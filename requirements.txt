@@ -1,0 +1,23 @@
+# Requires Python >= 3.10
+
+streamlit
+pandas
+numpy
+scikit-learn
+plotly
+joblib
+requests
+python-dotenv
+bcrypt
+pymongo[srv]
+pytz
+yfinance
+fpdf2
+kaleido
+
+# PPO Advisory Agent
+torch
+
+# News Sentiment
+transformers
+feedparser

@@ -1,0 +1,10 @@
+{
+  "obs_dim": 24,
+  "n_actions": 3,
+  "hidden": 128,
+  "action_labels": [
+    "HOLD",
+    "BUY",
+    "SELL"
+  ]
+}

@@ -1,0 +1,31 @@
+# Environment variables
+.env
+
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Editor / tool artefacts
+*.tmp.*
+.claude/
+
+# Legacy data files
+data/user_profile.csv
+data/aiprs_feedback.csv
+data/aiprs_survey.csv
+
+# Legacy asset
+assets/logo.png
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Reproducible outputs (regenerate via generate_figures.py)
+paper_figures/
+paper_figures.zip
