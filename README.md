@@ -35,8 +35,8 @@ The system operates across four layers:
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
-cd AIPRS_Dashboard
+git clone https://github.com/hnprivv/AIPRS
+cd AIPRS
 ```
 
 ### 2. Create a Virtual Environment
