@@ -5,10 +5,10 @@ import joblib
 
 # 1. Load Data
 try:
-    df = pd.read_csv('./data/user_profile.csv')
+    df = pd.read_json('./data/users_dataset.json', orient='records')
     print("✅ Data loaded successfully.")
 except FileNotFoundError:
-    print("❌ Error: user_profile.csv not found.")
+    print("❌ Error: users_dataset.json not found.")
     exit()
 
 # 2. Preprocessing / Encoding
@@ -34,11 +34,11 @@ experience_map = {
 
 # Apply mappings
 X = pd.DataFrame()
-X['Age'] = df['Age']
-X['Income_Score'] = df['Income Range'].map(income_map).fillna(1) # Default to 1 if unknown
-X['Risk_Score'] = df['Risk Tolerance'] # Already numeric (1-10)
-X['Horizon_Score'] = df['Investment Horizon'].map(horizon_map).fillna(1)
-X['Exp_Score'] = df['Experience'].map(experience_map).fillna(1)
+X['Age'] = df['age']
+X['Income_Score'] = df['income_range'].map(income_map).fillna(1) # Default to 1 if unknown
+X['Risk_Score'] = df['risk_tolerance'] # Already numeric (1-10)
+X['Horizon_Score'] = df['investment_horizon'].map(horizon_map).fillna(1)
+X['Exp_Score'] = df['experience'].map(experience_map).fillna(1)
 
 # 3. Scaling
 scaler = StandardScaler()
