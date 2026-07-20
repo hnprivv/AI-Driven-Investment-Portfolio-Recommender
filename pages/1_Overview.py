@@ -46,12 +46,37 @@ CLUSTER_ALLOCATIONS = {
 
 ASSET_TICKERS = {"Equities": "SPY", "Fixed Income": "AGG", "Commodities": "GLD", "Cash": "BIL"}
 
+# Heuristic ticker -> asset-class classifier for breaking a user's own
+# holdings into the same 4 categories used elsewhere. Anything not in this
+# lookup (individual stocks, index ETFs, PSX tickers, etc.) defaults to
+# Equities, which covers the overwhelming majority of realistic holdings.
+TICKER_CATEGORY_MAP = {
+    "AGG": "Fixed Income", "BND": "Fixed Income", "TLT": "Fixed Income",
+    "IEF": "Fixed Income", "SHY": "Fixed Income", "LQD": "Fixed Income",
+    "HYG": "Fixed Income", "MUB": "Fixed Income", "TIP": "Fixed Income",
+    "GLD": "Commodities", "SLV": "Commodities", "DBC": "Commodities",
+    "USO": "Commodities", "IAU": "Commodities", "PPLT": "Commodities",
+    "BIL": "Cash", "SHV": "Cash", "SGOV": "Cash", "ICSH": "Cash",
+}
+
+def classify_ticker(ticker: str) -> str:
+    return TICKER_CATEGORY_MAP.get(ticker.upper(), "Equities")
+
 user_cluster = int(user.get("cluster", 1))
 risk_profile = CLUSTER_LABELS.get(user_cluster, "Moderate")
 allocation   = CLUSTER_ALLOCATIONS.get(user_cluster, CLUSTER_ALLOCATIONS[1])
 badge_color  = BADGE_COLORS.get(risk_profile, "#F59E0B")
 
 saved_holdings = user.get("holdings", [])
+
+# Real breakdown of the user's own holdings by asset class — independent of
+# whether live price data was fetchable, since this only needs tickers/weights.
+holdings_by_category: dict | None = None
+if saved_holdings:
+    holdings_by_category = {}
+    for h in saved_holdings:
+        cat = classify_ticker(h["ticker"])
+        holdings_by_category[cat] = holdings_by_category.get(cat, 0) + h["weight"]
 
 # ---- Alpaca helpers ----
 ALPACA_DATA_URL = "https://data.alpaca.markets/v2"
@@ -230,19 +255,21 @@ def generate_pdf_report(
         )
         curve_img_bytes = _fig_c.to_image(format="png", width=900, height=350, scale=2)
 
-    # Allocation pie chart image
-    _fig_a = px.pie(
-        values=allocation_values,
-        names=allocation_labels,
-        color_discrete_sequence=["#F59E0B", "#FCD34D", "#B45309", "#78350F"],
-    )
-    _fig_a.update_layout(
-        paper_bgcolor="#FFFFFF",
-        font=dict(color="#111111", family="Arial"),
-        legend=dict(font=dict(color="#111111")),
-        margin=dict(l=20, r=20, t=20, b=20),
-    )
-    alloc_img_bytes = _fig_a.to_image(format="png", width=600, height=400, scale=2)
+    # Allocation pie chart image — only built if the user has holdings to break down
+    alloc_img_bytes = None
+    if allocation_labels and allocation_values:
+        _fig_a = px.pie(
+            values=allocation_values,
+            names=allocation_labels,
+            color_discrete_sequence=["#F59E0B", "#FCD34D", "#B45309", "#78350F"],
+        )
+        _fig_a.update_layout(
+            paper_bgcolor="#FFFFFF",
+            font=dict(color="#111111", family="Arial"),
+            legend=dict(font=dict(color="#111111")),
+            margin=dict(l=20, r=20, t=20, b=20),
+        )
+        alloc_img_bytes = _fig_a.to_image(format="png", width=600, height=400, scale=2)
 
     # Build PDF
     pdf = FPDF()
@@ -339,14 +366,22 @@ def generate_pdf_report(
     pdf.add_page()
     pdf.set_font("Helvetica", "B", 13)
     pdf.set_text_color(245, 158, 11)
-    pdf.cell(0, 8, "Recommended Asset Allocation", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 8, "Your Asset Allocation", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(2)
-    pdf.image(_io.BytesIO(alloc_img_bytes), x=30, w=150)
-    pdf.ln(1)
-    pdf.set_font("Helvetica", "I", 8)
-    pdf.set_text_color(90, 90, 96)
-    pdf.cell(0, 5, f"Figure: Recommended asset allocation for a {risk_profile} risk profile.",
-              new_x="LMARGIN", new_y="NEXT", align="C")
+    if alloc_img_bytes:
+        pdf.image(_io.BytesIO(alloc_img_bytes), x=30, w=150)
+        pdf.ln(1)
+        pdf.set_font("Helvetica", "I", 8)
+        pdf.set_text_color(90, 90, 96)
+        pdf.cell(0, 5, "Figure: Breakdown of your entered holdings by asset class.",
+                  new_x="LMARGIN", new_y="NEXT", align="C")
+    else:
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(90, 90, 96)
+        pdf.multi_cell(0, 6,
+            "No holdings entered yet, so an allocation breakdown isn't available. "
+            "Add your holdings on the Overview page, or visit AI Recommendations "
+            "for a personalized suggested allocation.")
     pdf.ln(4)
 
     # Holdings
@@ -492,8 +527,8 @@ with st.spinner("Generating portfolio report..."):
         metrics_source     = metrics_source,
         curve_dates        = _curve_dates,
         curve_values       = _curve_values,
-        allocation_labels  = list(allocation.keys()),
-        allocation_values  = list(allocation.values()),
+        allocation_labels  = list(holdings_by_category.keys())   if holdings_by_category else [],
+        allocation_values  = list(holdings_by_category.values()) if holdings_by_category else [],
         holdings           = saved_holdings,
     )
 
@@ -745,42 +780,47 @@ st.markdown("---")
 # ══════════════════════════════════════════════════════
 # ASSET ALLOCATION PIE
 # ══════════════════════════════════════════════════════
-st.markdown("<h3 style='color:#F59E0B;'>Recommended Asset Allocation</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#F59E0B;'>Your Asset Allocation</h3>", unsafe_allow_html=True)
 
-fig_alloc = px.pie(
-    values=list(allocation.values()),
-    names=list(allocation.keys()),
-    color_discrete_sequence=px.colors.sequential.Oranges,
-)
-fig_alloc.update_traces(
-    textinfo="percent",
-    textposition="inside",
-    pull=[0.02, 0.02, 0.05, 0],
-    automargin=True,
-    insidetextfont=dict(color="#0B0B0F", size=13, family="Inter"),
-)
-fig_alloc.update_layout(
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(color="#E4E4E7"),
-    showlegend=True,
-    legend=dict(
-        orientation="v",
-        font=dict(color="#E4E4E7", size=13),
-        bgcolor="rgba(15,10,0,0.85)",
-        bordercolor="rgba(217,119,6,0.3)",
-        borderwidth=1,
-        x=0.02, y=0.98, xanchor="left", yanchor="top",
-    ),
-    margin=dict(l=20, r=20, t=20, b=20),
-)
-st.plotly_chart(fig_alloc, use_container_width=True, config=modules.utils.PLOTLY_MODEBAR_CONFIG)
-
-st.markdown(
-    f"<p style='color:#A1A1AA;'>Allocation tailored to your <b>{risk_profile}</b> risk profile. "
-    "The AI engine refines these weights based on your full risk assessment.</p>",
-    unsafe_allow_html=True,
-)
+if holdings_by_category:
+    fig_alloc = px.pie(
+        values=list(holdings_by_category.values()),
+        names=list(holdings_by_category.keys()),
+        color_discrete_sequence=px.colors.sequential.Oranges,
+    )
+    fig_alloc.update_traces(
+        textinfo="percent",
+        textposition="inside",
+        pull=[0.02, 0.02, 0.05, 0],
+        automargin=True,
+        insidetextfont=dict(color="#0B0B0F", size=13, family="Inter"),
+    )
+    fig_alloc.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#E4E4E7"),
+        showlegend=True,
+        legend=dict(
+            orientation="v",
+            font=dict(color="#E4E4E7", size=13),
+            bgcolor="rgba(15,10,0,0.85)",
+            bordercolor="rgba(217,119,6,0.3)",
+            borderwidth=1,
+            x=0.02, y=0.98, xanchor="left", yanchor="top",
+        ),
+        margin=dict(l=20, r=20, t=20, b=20),
+    )
+    st.plotly_chart(fig_alloc, use_container_width=True, config=modules.utils.PLOTLY_MODEBAR_CONFIG)
+    st.markdown(
+        "<p style='color:#A1A1AA;'>Breakdown of your entered holdings by asset class. "
+        "For a personalized <i>recommended</i> allocation, see AI Recommendations.</p>",
+        unsafe_allow_html=True,
+    )
+else:
+    st.info(
+        "Add your holdings above to see your actual allocation breakdown here — "
+        "or visit **AI Recommendations** for a personalized suggested allocation."
+    )
 
 st.markdown("---")
 

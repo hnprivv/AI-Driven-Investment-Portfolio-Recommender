@@ -277,7 +277,7 @@ def get_bars(symbol: str, timeframe: str, limit: int) -> tuple[pd.DataFrame, boo
 # CHART BUILDER
 # ==============================================================================
 
-def build_candlestick_chart(df: pd.DataFrame, symbol: str, is_live: bool, currency_prefix: str = "$") -> go.Figure:
+def build_candlestick_chart(df: pd.DataFrame, symbol: str, is_live: bool, currency_prefix: str = "$", badge_text: str | None = None) -> go.Figure:
     """
     Build a professional candlestick chart with volume bars.
     Green candle = close >= open.  Red candle = close < open.
@@ -352,7 +352,7 @@ def build_candlestick_chart(df: pd.DataFrame, symbol: str, is_live: bool, curren
     first_close = df["close"].iloc[0]
     pct_change  = ((last_close - first_close) / first_close) * 100
     change_color = "#22C55E" if pct_change >= 0 else "#EF4444"
-    live_badge   = "🟠 15-MIN DELAYED" if is_live else "🟡 DEMO DATA"
+    live_badge   = badge_text if badge_text is not None else ("🟠 15-MIN DELAYED" if is_live else "🟡 DEMO DATA")
 
     fig.update_layout(
         template="plotly_dark",
@@ -935,7 +935,7 @@ with tab_psx:
             )
 
         fig_psx = build_candlestick_chart(df_psx_plot, selected_psx, is_live=True,
-                                          currency_prefix="PKR ")
+                                          currency_prefix="PKR ", badge_text="")
         st.plotly_chart(fig_psx, use_container_width=True, config={**modules.utils.PLOTLY_MODEBAR_CONFIG, "scrollZoom": True})
 
         last_psx = df_psx_plot.iloc[-1]

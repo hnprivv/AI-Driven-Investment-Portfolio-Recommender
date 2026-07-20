@@ -94,10 +94,12 @@ def fetch_bars(ticker: str, period_days: int = 365) -> pd.DataFrame | None:
 def compute_mpt_allocation(risk_tolerance: int) -> dict | None:
     """
     Mean-variance (Markowitz) optimisation over the same 4-asset universe
-    used on the Overview page. Maximises return minus a risk-aversion-weighted
-    penalty on variance, long-only, weights summing to 1. Risk aversion is
-    interpolated from the user's risk_tolerance score (1-10): lower tolerance
-    -> higher aversion -> allocation skews toward Fixed Income/Cash.
+    used on the Overview page: maximise expected return subject to a
+    volatility ceiling, long-only, weights summing to 1. The ceiling is
+    interpolated from the user's risk_tolerance score (1-10), so the result
+    can never exceed the risk level implied by their profile — unlike a
+    return-vs-variance penalty, which a large trailing return gap between
+    asset classes can override regardless of risk aversion.
     Returns None if live price history isn't available for all 4 assets.
     """
     price_series = {}
@@ -118,20 +120,37 @@ def compute_mpt_allocation(risk_tolerance: int) -> dict | None:
     ann_cov     = returns.cov().values * 252
 
     n = len(ASSET_TICKERS)
-    risk_free     = 0.045
-    risk_aversion = float(np.interp(risk_tolerance, [1, 10], [8.0, 1.0]))
+    risk_free  = 0.045
+    target_vol = float(np.interp(risk_tolerance, [1, 10], [0.06, 0.22]))
 
-    def objective(w):
-        port_return = w @ ann_returns
-        port_var    = w @ ann_cov @ w
-        return -(port_return - 0.5 * risk_aversion * port_var)
-
-    constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]
     bounds      = [(0, 1)] * n
+    sum_to_one  = {"type": "eq", "fun": lambda w: np.sum(w) - 1}
     w0          = np.array([1 / n] * n)
 
-    result  = minimize(objective, w0, method="SLSQP", bounds=bounds, constraints=constraints)
-    weights = result.x if result.success else w0
+    def port_vol_fn(w):
+        return float(np.sqrt(w @ ann_cov @ w))
+
+    # Step 1: global minimum-variance portfolio, to know the lowest volatility
+    # actually achievable with this asset set — a target below this is infeasible.
+    min_var_result = minimize(
+        lambda w: w @ ann_cov @ w, w0, method="SLSQP",
+        bounds=bounds, constraints=[sum_to_one],
+    )
+    min_var_weights = min_var_result.x if min_var_result.success else w0
+    min_achievable_vol = port_vol_fn(min_var_weights)
+
+    effective_target = max(target_vol, min_achievable_vol)
+
+    # Step 2: maximise return subject to volatility staying within the target.
+    constraints = [
+        sum_to_one,
+        {"type": "ineq", "fun": lambda w: effective_target - port_vol_fn(w)},
+    ]
+    result = minimize(
+        lambda w: -(w @ ann_returns), w0, method="SLSQP",
+        bounds=bounds, constraints=constraints,
+    )
+    weights = result.x if result.success else min_var_weights
     weights = np.clip(weights, 0, None)
     weights = weights / weights.sum()
 
