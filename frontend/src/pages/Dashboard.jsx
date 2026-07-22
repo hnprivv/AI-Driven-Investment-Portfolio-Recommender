@@ -118,7 +118,9 @@ export default function Dashboard() {
   if (error) {
     return (
       <div className="dashboard">
-        <p className="error">{error}</p>
+        <div className="dashboard-inner">
+          <p className="error">{error}</p>
+        </div>
       </div>
     );
   }
@@ -126,7 +128,9 @@ export default function Dashboard() {
   if (!data) {
     return (
       <div className="dashboard">
-        <p className="subtitle">Loading your portfolio…</p>
+        <div className="dashboard-inner">
+          <p className="subtitle">Loading your portfolio…</p>
+        </div>
       </div>
     );
   }
@@ -140,6 +144,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
+      <div className="dashboard-inner">
       <h1>Welcome back, {user.name}</h1>
       <p className="subtitle">Your personalized investment snapshot powered by AIPRS</p>
 
@@ -183,44 +188,50 @@ export default function Dashboard() {
         </p>
       </section>
 
+      <div className="dash-divider"><span>◆</span></div>
+
       {/* ── Portfolio Performance ─────────────────────────────────────── */}
       <section className="dash-section">
         <h2 className="dash-section-title">Portfolio Performance</h2>
-        {data.curve.length > 0 ? (
-          <Plot
-            data={[
-              {
-                x: curveDates,
-                y: curveValues,
-                type: "scatter",
-                mode: "lines",
-                line: { color: "#F59E0B" },
-              },
-            ]}
-            layout={{
-              autosize: true,
-              height: 400,
-              margin: { l: 40, r: 20, t: 20, b: 40 },
-              paper_bgcolor: "rgba(0,0,0,0)",
-              plot_bgcolor: "rgba(0,0,0,0)",
-              font: { family: "Inter", size: 12, color: "#E4E4E7" },
-              xaxis: { type: "date", gridcolor: "rgba(255,255,255,0.04)" },
-              yaxis: { tickformat: ".3f", gridcolor: "rgba(255,255,255,0.05)" },
-              shapes: [
+        <div className="chart-card">
+          {data.curve.length > 0 ? (
+            <Plot
+              data={[
                 {
-                  type: "line", xref: "paper", x0: 0, x1: 1, y0: 1, y1: 1,
-                  line: { color: "rgba(255,255,255,0.18)", dash: "dot" },
+                  x: curveDates,
+                  y: curveValues,
+                  type: "scatter",
+                  mode: "lines",
+                  line: { color: "#F59E0B" },
                 },
-              ],
-            }}
-            config={{ ...PLOTLY_MODEBAR_CONFIG, scrollZoom: true }}
-            style={{ width: "100%" }}
-            useResizeHandler
-          />
-        ) : (
-          <p className="dash-caption">⚠️ Chart unavailable — market data could not be fetched.</p>
-        )}
+              ]}
+              layout={{
+                autosize: true,
+                height: 400,
+                margin: { l: 40, r: 20, t: 20, b: 40 },
+                paper_bgcolor: "rgba(0,0,0,0)",
+                plot_bgcolor: "rgba(0,0,0,0)",
+                font: { family: "Inter", size: 12, color: "#E4E4E7" },
+                xaxis: { type: "date", gridcolor: "rgba(255,255,255,0.04)" },
+                yaxis: { tickformat: ".3f", gridcolor: "rgba(255,255,255,0.05)" },
+                shapes: [
+                  {
+                    type: "line", xref: "paper", x0: 0, x1: 1, y0: 1, y1: 1,
+                    line: { color: "rgba(255,255,255,0.18)", dash: "dot" },
+                  },
+                ],
+              }}
+              config={{ ...PLOTLY_MODEBAR_CONFIG, scrollZoom: true }}
+              style={{ width: "100%" }}
+              useResizeHandler
+            />
+          ) : (
+            <p className="dash-caption">⚠️ Chart unavailable — market data could not be fetched.</p>
+          )}
+        </div>
       </section>
+
+      <div className="dash-divider"><span>◆</span></div>
 
       {/* ── Holdings Input ────────────────────────────────────────────── */}
       <section className="dash-section">
@@ -267,82 +278,90 @@ export default function Dashboard() {
         </form>
       </section>
 
+      <div className="dash-divider"><span>◆</span></div>
+
       {/* ── Profile Summary ───────────────────────────────────────────── */}
       <section className="dash-section">
         <h2 className="dash-section-title">Profile Summary</h2>
-        <div className="profile-grid">
-          <div className="profile-col">
-            <p><b>Name:</b> {data.profile.name}</p>
-            <p><b>Age:</b> {data.profile.age}</p>
-            <p><b>Income Range:</b> {data.profile.income_range}</p>
-            <p><b>Risk Tolerance:</b> {data.profile.risk_tolerance}</p>
-            <p><b>Investment Horizon:</b> {data.profile.investment_horizon}</p>
-          </div>
-          <div className="profile-col">
-            <p><b>Experience Level:</b> {data.profile.experience}</p>
-            <p><b>Primary Goals:</b> {data.profile.goals}</p>
-            <p><b>Preferred Assets:</b> {preferences}</p>
-            <div className="risk-badge-row">
-              <span className="risk-badge-label">Risk Cluster</span>
-              <span className="risk-badge" style={{ "--badge-color": data.badge_color }}>
-                ● {data.risk_profile}
-              </span>
+        <div className="chart-card profile-card">
+          <div className="profile-grid">
+            <div className="profile-col">
+              <p><b>Name:</b> {data.profile.name}</p>
+              <p><b>Age:</b> {data.profile.age}</p>
+              <p><b>Income Range:</b> {data.profile.income_range}</p>
+              <p><b>Risk Tolerance:</b> {data.profile.risk_tolerance}</p>
+              <p><b>Investment Horizon:</b> {data.profile.investment_horizon}</p>
+            </div>
+            <div className="profile-col">
+              <p><b>Experience Level:</b> {data.profile.experience}</p>
+              <p><b>Primary Goals:</b> {data.profile.goals}</p>
+              <p><b>Preferred Assets:</b> {preferences}</p>
+              <div className="risk-badge-row">
+                <span className="risk-badge-label">Risk Cluster</span>
+                <span className="risk-badge" style={{ "--badge-color": data.badge_color }}>
+                  ● {data.risk_profile}
+                </span>
+              </div>
             </div>
           </div>
+          {behavior && (
+            <div className="behavior-box">
+              <span className="behavior-label">Investor Behaviour</span>
+              <p>{behavior.desc}</p>
+              <span className="behavior-label">Ideal Portfolio</span>
+              <p>{behavior.portfolio}</p>
+            </div>
+          )}
         </div>
-        {behavior && (
-          <div className="behavior-box">
-            <span className="behavior-label">Investor Behaviour</span>
-            <p>{behavior.desc}</p>
-            <span className="behavior-label">Ideal Portfolio</span>
-            <p>{behavior.portfolio}</p>
-          </div>
-        )}
       </section>
+
+      <div className="dash-divider"><span>◆</span></div>
 
       {/* ── Asset Allocation ──────────────────────────────────────────── */}
       <section className="dash-section">
         <h2 className="dash-section-title">Your Asset Allocation</h2>
         {data.holdings_by_category ? (
           <>
-            <Plot
-              data={[
-                {
-                  type: "pie",
-                  values: Object.values(data.holdings_by_category),
-                  labels: Object.keys(data.holdings_by_category),
-                  marker: {
-                    colors: Object.keys(data.holdings_by_category).map(
-                      (cat) => CATEGORY_COLORS[cat] || "#F59E0B"
-                    ),
+            <div className="chart-card">
+              <Plot
+                data={[
+                  {
+                    type: "pie",
+                    values: Object.values(data.holdings_by_category),
+                    labels: Object.keys(data.holdings_by_category),
+                    marker: {
+                      colors: Object.keys(data.holdings_by_category).map(
+                        (cat) => CATEGORY_COLORS[cat] || "#F59E0B"
+                      ),
+                    },
+                    textinfo: "percent",
+                    textposition: "inside",
+                    insidetextfont: { color: "#0B0B0F", size: 13, family: "Inter" },
+                    automargin: true,
                   },
-                  textinfo: "percent",
-                  textposition: "inside",
-                  insidetextfont: { color: "#0B0B0F", size: 13, family: "Inter" },
-                  automargin: true,
-                },
-              ]}
-              layout={{
-                autosize: true,
-                height: 380,
-                paper_bgcolor: "rgba(0,0,0,0)",
-                plot_bgcolor: "rgba(0,0,0,0)",
-                font: { color: "#E4E4E7" },
-                showlegend: true,
-                legend: {
-                  orientation: "v",
-                  font: { color: "#E4E4E7", size: 13 },
-                  bgcolor: "rgba(15,10,0,0.85)",
-                  bordercolor: "rgba(217,119,6,0.3)",
-                  borderwidth: 1,
-                  x: 0.02, y: 0.98, xanchor: "left", yanchor: "top",
-                },
-                margin: { l: 20, r: 20, t: 20, b: 20 },
-              }}
-              config={PLOTLY_MODEBAR_CONFIG}
-              style={{ width: "100%" }}
-              useResizeHandler
-            />
+                ]}
+                layout={{
+                  autosize: true,
+                  height: 380,
+                  paper_bgcolor: "rgba(0,0,0,0)",
+                  plot_bgcolor: "rgba(0,0,0,0)",
+                  font: { color: "#E4E4E7" },
+                  showlegend: true,
+                  legend: {
+                    orientation: "v",
+                    font: { color: "#E4E4E7", size: 13 },
+                    bgcolor: "rgba(15,10,0,0.85)",
+                    bordercolor: "rgba(217,119,6,0.3)",
+                    borderwidth: 1,
+                    x: 0.02, y: 0.98, xanchor: "left", yanchor: "top",
+                  },
+                  margin: { l: 20, r: 20, t: 20, b: 20 },
+                }}
+                config={PLOTLY_MODEBAR_CONFIG}
+                style={{ width: "100%" }}
+                useResizeHandler
+              />
+            </div>
             <p className="dash-caption">
               Breakdown of your entered holdings by asset class. For a personalized{" "}
               <i>recommended</i> allocation, see AI Recommendations.
@@ -355,6 +374,8 @@ export default function Dashboard() {
           </div>
         )}
       </section>
+
+      <div className="dash-divider"><span>◆</span></div>
 
       {/* ── AI Cluster Placement ──────────────────────────────────────── */}
       <section className="dash-section">
@@ -438,6 +459,7 @@ export default function Dashboard() {
           <p className="dash-caption">Loading cluster visualisation…</p>
         )}
       </section>
+      </div>
     </div>
   );
 }
