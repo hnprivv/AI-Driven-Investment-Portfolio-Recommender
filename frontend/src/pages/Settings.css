@@ -1,0 +1,48 @@
+@import "./shared.css";
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.account-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.settings-form {
+  max-width: 480px;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.danger-title {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.danger-card {
+  background: linear-gradient(160deg, rgba(220, 38, 38, 0.08), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  border-radius: 14px;
+  padding: 18px 20px;
+  max-width: 480px;
+  box-shadow: 0 0 18px rgba(220, 38, 38, 0.08);
+}
+
+@media (max-width: 700px) {
+  .account-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

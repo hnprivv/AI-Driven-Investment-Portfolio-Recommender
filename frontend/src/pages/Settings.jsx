@@ -1,6 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { changePassword, deleteAccount, getFullProfile } from "../api";
+import "./Settings.css";
+
+const CLUSTER_LABELS = { 0: "Conservative", 1: "Moderate", 2: "Aggressive", 3: "Very Aggressive" };
+const BADGE_COLORS = {
+  Conservative: "#16a34a", Moderate: "#FFE600",
+  Aggressive: "#ff8400", "Very Aggressive": "#b71212",
+};
+
+function fmtDate(iso) {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  } catch {
+    return "—";
+  }
+}
 
 export default function Settings() {
   const { onLogout } = useOutletContext();
@@ -88,74 +104,127 @@ export default function Settings() {
     }
   }
 
-  return (
-    <div className="settings-page">
-      <h1>Settings</h1>
+  const riskProfile = profile ? CLUSTER_LABELS[profile.cluster] || "Moderate" : null;
+  const badgeColor = riskProfile ? BADGE_COLORS[riskProfile] : "#F59E0B";
 
-      <div className="settings-grid">
-        <section className="card">
-          <h2>🔑 Change Password</h2>
-          <form onSubmit={handlePasswordSubmit}>
-            <label>Current Password</label>
+  return (
+    <div className="page-shell">
+      <div className="page-shell-inner">
+        <h1>Settings</h1>
+        <p className="subtitle">Manage your account, notifications, and data.</p>
+
+        {/* ── Account Overview ──────────────────────────────────────────── */}
+        <section className="dash-section">
+          <h2 className="dash-section-title">Account Overview</h2>
+          {profile ? (
+            <div className="chart-card">
+              <div className="account-grid">
+                <div>
+                  <span className="metric-label">Name</span>
+                  <span className="account-value">{profile.name}</span>
+                </div>
+                <div>
+                  <span className="metric-label">Email</span>
+                  <span className="account-value">{profile.email || "—"}</span>
+                </div>
+                <div>
+                  <span className="metric-label">Member Since</span>
+                  <span className="account-value">{fmtDate(profile.created_at)}</span>
+                </div>
+                <div>
+                  <span className="metric-label">Risk Profile</span>
+                  <span className="risk-badge" style={{ "--badge-color": badgeColor }}>
+                    ● {riskProfile}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="dash-caption">Loading your profile…</p>
+          )}
+        </section>
+
+        <div className="dash-divider"><span>◆</span></div>
+
+        {/* ── Change Password ───────────────────────────────────────────── */}
+        <section className="dash-section">
+          <h2 className="dash-section-title">🔑 Change Password</h2>
+          <form onSubmit={handlePasswordSubmit} className="chart-card settings-form">
+            <label className="field-label" htmlFor="current-pw">Current Password</label>
             <input
+              id="current-pw"
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
             />
-            <label>New Password</label>
+            <label className="field-label" htmlFor="new-pw" style={{ marginTop: 14 }}>New Password</label>
             <input
+              id="new-pw"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Min. 8 characters"
             />
-            <label>Confirm New Password</label>
+            <label className="field-label" htmlFor="confirm-pw" style={{ marginTop: 14 }}>Confirm New Password</label>
             <input
+              id="confirm-pw"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-            {pwError && <div className="error">{pwError}</div>}
-            {pwSuccess && <div className="success">{pwSuccess}</div>}
-            <button type="submit" disabled={pwSubmitting}>
+            {pwError && <div className="error" style={{ marginTop: 10 }}>{pwError}</div>}
+            {pwSuccess && <div className="success" style={{ marginTop: 10 }}>{pwSuccess}</div>}
+            <button type="submit" disabled={pwSubmitting} style={{ width: "100%", marginTop: 16 }}>
               {pwSubmitting ? "Updating…" : "Update Password"}
             </button>
           </form>
         </section>
 
-        <section className="card">
-          <h2>📤 Export Profile Data</h2>
-          <p className="subtitle">
-            Download a copy of your AIPRS profile as a JSON file. Your password is
-            excluded from the export.
-          </p>
-          <button onClick={handleExport} disabled={!profile}>
-            ⬇️ Download My Data
-          </button>
+        <div className="dash-divider"><span>◆</span></div>
+
+        {/* ── Export Profile Data ───────────────────────────────────────── */}
+        <section className="dash-section">
+          <h2 className="dash-section-title">📤 Export Profile Data</h2>
+          <div className="chart-card settings-form">
+            <p className="dash-caption" style={{ margin: "0 0 14px" }}>
+              Download a copy of your AIPRS profile as a JSON file. Your password is excluded from
+              the export.
+            </p>
+            <button onClick={handleExport} disabled={!profile} style={{ width: "100%" }}>
+              ⬇️ Download My Data
+            </button>
+          </div>
         </section>
 
-        <section className="card danger-zone">
-          <h2>⚠️ Danger Zone</h2>
-          <p className="subtitle">
-            Deleting your account is <b>permanent and cannot be undone</b>. Enter
-            your password to confirm.
-          </p>
-          <form onSubmit={handleDelete}>
-            <label>Password</label>
-            <input
-              type="password"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-            />
-            {deleteError && <div className="error">{deleteError}</div>}
-            <button
-              type="submit"
-              className="danger-button"
-              disabled={deleteSubmitting}
-            >
-              {deleteSubmitting ? "Deleting…" : "🗑️ Permanently Delete Account"}
-            </button>
-          </form>
+        <div className="dash-divider"><span>◆</span></div>
+
+        {/* ── Danger Zone ────────────────────────────────────────────────── */}
+        <section className="dash-section">
+          <h2 className="dash-section-title danger-title">⚠️ Danger Zone</h2>
+          <div className="danger-card">
+            <p className="dash-caption" style={{ margin: "0 0 14px", color: "#f1a3a3" }}>
+              Deleting your account is <b>permanent and cannot be undone</b>. All your profile data,
+              risk assessments, and preferences will be removed.
+            </p>
+            <form onSubmit={handleDelete} className="settings-form">
+              <label className="field-label" htmlFor="delete-pw">Password</label>
+              <input
+                id="delete-pw"
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+              />
+              {deleteError && <div className="error" style={{ marginTop: 10 }}>{deleteError}</div>}
+              <button
+                type="submit"
+                className="danger-button"
+                disabled={deleteSubmitting}
+                style={{ width: "100%", marginTop: 16 }}
+              >
+                {deleteSubmitting ? "Deleting…" : "🗑️ Permanently Delete Account"}
+              </button>
+            </form>
+          </div>
         </section>
       </div>
     </div>
