@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../api";
 
@@ -10,18 +10,70 @@ const NAV_LINKS = [
   { label: "Market", path: "/market" },
   { label: "News", path: "/news" },
   { label: "Feedback", path: "/feedback" },
-  { label: "Settings", path: "/settings" },
 ];
 
-export default function Navbar({ user, onLogout }) {
+function initials(name) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] || "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase();
+}
+
+function UserMenu({ user, onLogout }) {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   async function handleLogout() {
+    setOpen(false);
     await logout();
     onLogout();
     navigate("/login");
   }
+
+  return (
+    <div className="navbar-user-menu" ref={ref}>
+      <button
+        type="button"
+        className={`navbar-user-trigger ${open ? "open" : ""}`}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="navbar-avatar">{initials(user.name)}</span>
+        <span className="navbar-username">{user.name}</span>
+        <svg width="10" height="6" viewBox="0 0 12 8" fill="none">
+          <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="navbar-user-dropdown">
+          <Link to="/profile" className="navbar-user-dropdown-item" onClick={() => setOpen(false)}>
+            Edit Profile
+          </Link>
+          <Link to="/settings" className="navbar-user-dropdown-item" onClick={() => setOpen(false)}>
+            Settings
+          </Link>
+          <div className="navbar-user-dropdown-divider" />
+          <button type="button" className="navbar-user-dropdown-item danger" onClick={handleLogout}>
+            Log Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Navbar({ user, onLogout }) {
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="navbar">
@@ -50,12 +102,7 @@ export default function Navbar({ user, onLogout }) {
 
           <div className="navbar-user">
             {user ? (
-              <>
-                <span className="navbar-username">{user.name}</span>
-                <button className="navbar-logout" onClick={handleLogout}>
-                  Log Out
-                </button>
-              </>
+              <UserMenu user={user} onLogout={onLogout} />
             ) : (
               <>
                 <Link to="/login" className="navbar-login-link" onClick={() => setMenuOpen(false)}>

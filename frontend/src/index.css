@@ -400,12 +400,96 @@ button:disabled {
   color: var(--text);
 }
 
-.navbar-logout {
+.navbar-user-menu {
+  position: relative;
+}
+
+.navbar-user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
-  padding: 6px 14px;
-  font-size: 13px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px 12px 5px 5px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.navbar-user-trigger:hover,
+.navbar-user-trigger.open {
+  border-color: rgba(217, 119, 6, 0.4);
+  background: rgba(217, 119, 6, 0.08);
+}
+
+.navbar-user-trigger svg {
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.navbar-user-trigger.open svg {
+  transform: rotate(180deg);
+}
+
+.navbar-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #0b0b0f;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.navbar-user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: #1a1400;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  z-index: 30;
+}
+
+.navbar-user-dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  margin: 0;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.navbar-user-dropdown-item:hover {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--secondary);
+}
+
+.navbar-user-dropdown-item.danger:hover {
+  background: rgba(220, 38, 38, 0.12);
+  color: #f87171;
+}
+
+.navbar-user-dropdown-divider {
+  height: 1px;
+  margin: 6px 4px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .navbar-login-link {
@@ -474,14 +558,25 @@ button:disabled {
 
   .navbar-user {
     justify-content: space-between;
+  }
+
+  .navbar-user-menu {
+    width: 100%;
+  }
+
+  .navbar-user-trigger {
+    width: 100%;
+    justify-content: space-between;
     background: linear-gradient(135deg, rgba(217, 119, 6, 0.08), rgba(255, 255, 255, 0.02));
     border: 1px solid var(--card-border);
     border-radius: 12px;
-    padding: 12px 14px;
+    padding: 10px 14px;
   }
 
-  .navbar-logout {
-    padding: 8px 16px;
+  .navbar-user-dropdown {
+    position: static;
+    margin-top: 6px;
+    box-shadow: none;
   }
 
   .navbar-hamburger {
