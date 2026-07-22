@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Feedback from "./pages/Feedback";
 import MarketOverview from "./pages/MarketOverview";
 import NewsSentiment from "./pages/NewsSentiment";
 import Recommendations from "./pages/Recommendations";
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/recommendations" element={<Recommendations />} />
         <Route path="/market" element={<MarketOverview />} />
         <Route path="/news" element={<NewsSentiment />} />
+        <Route path="/feedback" element={<Feedback />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>

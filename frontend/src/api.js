@@ -106,6 +106,14 @@ export function getPsxCompanyNews(query, limit) {
   return request(`/news/psx/company?query=${encodeURIComponent(query)}&limit=${limit}`);
 }
 
+export function submitFeedback(payload) {
+  return request("/feedback", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export function submitSurvey(payload) {
+  return request("/survey", { method: "POST", body: JSON.stringify(payload) });
+}
+
 export function saveHoldings(holdingsText) {
   return request("/users/me/holdings", {
     method: "PUT",

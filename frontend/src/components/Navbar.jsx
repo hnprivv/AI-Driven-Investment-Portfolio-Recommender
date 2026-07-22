@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { label: "AI Recommendations", path: "/recommendations" },
   { label: "Market", path: "/market" },
   { label: "News", path: "/news" },
+  { label: "Feedback", path: "/feedback" },
   { label: "Settings", path: "/settings" },
 ];
 
