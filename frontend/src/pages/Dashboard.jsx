@@ -19,6 +19,13 @@ const BEHAVIORS = {
   },
 };
 
+const CATEGORY_COLORS = {
+  "Equities": "#F59E0B",
+  "Fixed Income": "#FCD34D",
+  "Commodities": "#B45309",
+  "Cash": "#78350F",
+};
+
 const PLOTLY_MODEBAR_CONFIG = {
   displaylogo: false,
   modeBarButtonsToRemove: [
@@ -259,6 +266,62 @@ export default function Dashboard() {
             <p>{behavior.desc}</p>
             <span className="behavior-label">Ideal Portfolio</span>
             <p>{behavior.portfolio}</p>
+          </div>
+        )}
+      </section>
+
+      {/* ── Asset Allocation ──────────────────────────────────────────── */}
+      <section className="dash-section">
+        <h2 className="dash-section-title">Your Asset Allocation</h2>
+        {data.holdings_by_category ? (
+          <>
+            <Plot
+              data={[
+                {
+                  type: "pie",
+                  values: Object.values(data.holdings_by_category),
+                  labels: Object.keys(data.holdings_by_category),
+                  marker: {
+                    colors: Object.keys(data.holdings_by_category).map(
+                      (cat) => CATEGORY_COLORS[cat] || "#F59E0B"
+                    ),
+                  },
+                  textinfo: "percent",
+                  textposition: "inside",
+                  insidetextfont: { color: "#0B0B0F", size: 13, family: "Inter" },
+                  automargin: true,
+                },
+              ]}
+              layout={{
+                autosize: true,
+                height: 380,
+                paper_bgcolor: "rgba(0,0,0,0)",
+                plot_bgcolor: "rgba(0,0,0,0)",
+                font: { color: "#E4E4E7" },
+                showlegend: true,
+                legend: {
+                  orientation: "v",
+                  font: { color: "#E4E4E7", size: 13 },
+                  bgcolor: "rgba(15,10,0,0.85)",
+                  bordercolor: "rgba(217,119,6,0.3)",
+                  borderwidth: 1,
+                  x: 0.02, y: 0.98, xanchor: "left", yanchor: "top",
+                },
+                margin: { l: 20, r: 20, t: 20, b: 20 },
+              }}
+              config={PLOTLY_MODEBAR_CONFIG}
+              style={{ width: "100%" }}
+              useResizeHandler
+            />
+            <p className="dash-caption">
+              Breakdown of your entered holdings by asset class. For a personalized{" "}
+              <i>recommended</i> allocation, see AI Recommendations.
+            </p>
+          </>
+        ) : (
+          <div className="info-box">
+            Add your holdings above to see your actual allocation breakdown here — or visit{" "}
+            <b>AI Recommendations</b> for a personalized suggested allocation.
           </div>
         )}
       </section>
