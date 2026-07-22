@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { me } from "./api";
 import Layout from "./components/Layout";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
@@ -22,16 +23,17 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/" element={<Home user={user} onLogout={() => setUser(null)} />} />
       <Route
         path="/login"
-        element={user ? <Navigate to="/" /> : <Login onLogin={setUser} />}
+        element={user ? <Navigate to="/dashboard" /> : <Login onLogin={setUser} />}
       />
       <Route
         path="/signup"
-        element={user ? <Navigate to="/" /> : <Signup onLogin={setUser} />}
+        element={user ? <Navigate to="/dashboard" /> : <Signup onLogin={setUser} />}
       />
       <Route element={<Layout user={user} onLogout={() => setUser(null)} />}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>

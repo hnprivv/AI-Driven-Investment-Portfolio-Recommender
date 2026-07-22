@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../api";
 
 // One-line addition per future page — Overview, Recommendations, Market,
 // PPO Advisors, News, etc. just get appended here as they're built.
 const NAV_LINKS = [
-  { label: "Dashboard", path: "/" },
+  { label: "Dashboard", path: "/dashboard" },
   { label: "Settings", path: "/settings" },
 ];
 
@@ -22,32 +22,46 @@ export default function Navbar({ user, onLogout }) {
   return (
     <header className="navbar">
       <div className="navbar-inner">
-        <NavLink to="/" className="navbar-brand">
+        <Link to="/" className="navbar-brand">
           AIPRS
-        </NavLink>
+        </Link>
 
         <div className={`navbar-menu ${menuOpen ? "open" : ""}`}>
-          <nav className="navbar-links">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                end={link.path === "/"}
-                className={({ isActive }) =>
-                  "navbar-link" + (isActive ? " active" : "")
-                }
-                onClick={() => setMenuOpen(false)}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
+          {user && (
+            <nav className="navbar-links">
+              {NAV_LINKS.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={({ isActive }) =>
+                    "navbar-link" + (isActive ? " active" : "")
+                  }
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </nav>
+          )}
 
           <div className="navbar-user">
-            <span className="navbar-username">{user?.name}</span>
-            <button className="navbar-logout" onClick={handleLogout}>
-              Log Out
-            </button>
+            {user ? (
+              <>
+                <span className="navbar-username">{user.name}</span>
+                <button className="navbar-logout" onClick={handleLogout}>
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="navbar-login-link" onClick={() => setMenuOpen(false)}>
+                  Log In
+                </Link>
+                <Link to="/signup" onClick={() => setMenuOpen(false)}>
+                  <button className="navbar-signup-btn" type="button">Sign Up</button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
