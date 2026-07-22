@@ -113,6 +113,8 @@ export default function Home({ user, onLogout }) {
         </div>
       </section>
 
+      <div className="section-divider"><span>◆</span></div>
+
       <section className="section">
         <h2 className="section-title">Why Choose AIPRS?</h2>
         <div className="features-grid">
@@ -128,6 +130,8 @@ export default function Home({ user, onLogout }) {
         </div>
       </section>
 
+      <div className="section-divider"><span>◆</span></div>
+
       <section className="section">
         <h2 className="section-title">How It Works</h2>
         <div className="timeline">
@@ -142,6 +146,8 @@ export default function Home({ user, onLogout }) {
           ))}
         </div>
       </section>
+
+      <div className="section-divider"><span>◆</span></div>
 
       <section className="section">
         <h2 className="section-title">Our Mission</h2>
@@ -159,15 +165,18 @@ export default function Home({ user, onLogout }) {
       </section>
 
       {!user && (
-        <section className="section">
-          <div className="cta-band">
-            <h3>Ready to Begin?</h3>
-            <p>Get your AI risk profile in under 2 minutes. No commitment.</p>
-            <Link to="/signup">
-              <button className="btn-primary" type="button">Get Started Free</button>
-            </Link>
-          </div>
-        </section>
+        <>
+          <div className="section-divider"><span>◆</span></div>
+          <section className="section">
+            <div className="cta-band">
+              <h3>Ready to Begin?</h3>
+              <p>Get your AI risk profile in under 2 minutes. No commitment.</p>
+              <Link to="/signup">
+                <button className="btn-primary" type="button">Get Started Free</button>
+              </Link>
+            </div>
+          </section>
+        </>
       )}
 
       <footer className="home-footer">

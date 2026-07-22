@@ -55,3 +55,7 @@ export function deleteAccount(password) {
     body: JSON.stringify({ password }),
   });
 }
+
+export function getPortfolioOverview() {
+  return request("/portfolio/overview");
+}

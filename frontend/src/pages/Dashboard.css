@@ -1,0 +1,141 @@
+.dashboard {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.dashboard h1 {
+  margin: 0 0 6px;
+}
+
+.dash-section {
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dash-section:first-of-type {
+  margin-top: 28px;
+}
+
+.dash-section-title {
+  font-size: 18px;
+  color: var(--secondary);
+  margin: 0 0 16px;
+}
+
+.dash-section-sub {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.dash-caption {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 12px 0 0;
+  line-height: 1.6;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.profile-col p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.profile-col b {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.risk-badge-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.risk-badge-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.risk-badge {
+  background: color-mix(in srgb, var(--badge-color) 15%, transparent);
+  color: var(--badge-color);
+  border: 1px solid color-mix(in srgb, var(--badge-color) 40%, transparent);
+  border-radius: 20px;
+  padding: 3px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.behavior-box {
+  margin-top: 18px;
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.07), rgba(255, 255, 255, 0.01));
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.behavior-box p {
+  margin: 0 0 12px;
+}
+
+.behavior-box p:last-child {
+  margin-bottom: 0;
+}
+
+.behavior-label {
+  color: var(--secondary-light);
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -283,12 +283,6 @@ button:disabled {
   margin-top: 10px;
 }
 
-.dashboard {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 0 24px;
-}
-
 .success {
   color: #22c55e;
   font-size: 13px;
