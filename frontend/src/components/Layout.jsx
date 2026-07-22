@@ -1,0 +1,15 @@
+import { Navigate, Outlet } from "react-router-dom";
+import Navbar from "./Navbar";
+
+export default function Layout({ user, onLogout }) {
+  if (!user) return <Navigate to="/login" />;
+
+  return (
+    <>
+      <Navbar user={user} onLogout={onLogout} />
+      <main className="page-content">
+        <Outlet context={{ user, onLogout }} />
+      </main>
+    </>
+  );
+}
