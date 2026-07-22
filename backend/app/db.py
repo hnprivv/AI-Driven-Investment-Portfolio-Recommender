@@ -21,6 +21,10 @@ def get_user_by_name(name: str) -> dict | None:
     return get_db()["users"].find_one({"name": name})
 
 
+def get_all_users() -> list[dict]:
+    return list(get_db()["users"].find({}))
+
+
 def update_user(name: str, updates: dict) -> bool:
     result = get_db()["users"].update_one({"name": name}, {"$set": updates})
     return result.matched_count > 0

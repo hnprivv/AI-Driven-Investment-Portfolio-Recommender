@@ -6,6 +6,7 @@ import { logout } from "../api";
 // PPO Advisors, News, etc. just get appended here as they're built.
 const NAV_LINKS = [
   { label: "Dashboard", path: "/dashboard" },
+  { label: "AI Recommendations", path: "/recommendations" },
   { label: "Settings", path: "/settings" },
 ];
 

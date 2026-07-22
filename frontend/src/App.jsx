@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Recommendations from "./pages/Recommendations";
 import Settings from "./pages/Settings";
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
       />
       <Route element={<Layout user={user} onLogout={() => setUser(null)} />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/recommendations" element={<Recommendations />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>

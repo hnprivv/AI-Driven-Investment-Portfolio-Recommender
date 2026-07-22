@@ -64,6 +64,10 @@ export function getClusterPlacement() {
   return request("/portfolio/cluster-placement");
 }
 
+export function getRecommendations() {
+  return request("/recommendations");
+}
+
 export function saveHoldings(holdingsText) {
   return request("/users/me/holdings", {
     method: "PUT",

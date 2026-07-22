@@ -334,7 +334,9 @@ button:disabled {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #0f0c00;
+  background: rgba(15, 12, 0, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--card-border);
 }
 
