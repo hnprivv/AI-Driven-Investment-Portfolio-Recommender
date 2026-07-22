@@ -102,88 +102,98 @@ export default function Signup({ onLogin }) {
           Create your account and let our AI analyze your financial profile in one step.
         </p>
 
-        <h3>1. Account Details</h3>
-        <label>Full Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Doe" />
-        <label>Email Address</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="name@example.com"
-        />
-        <label>Create Password</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <label>Confirm Password</label>
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
+        <div className="signup-columns">
+          <div className="signup-col">
+            <h3>1. Account Details</h3>
+            <label>Full Name</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Doe" />
+            <label>Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@example.com"
+            />
+            <label>Create Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
 
-        <h3>2. Financial Profile</h3>
-        <label>Age</label>
-        <input
-          type="number"
-          min={18}
-          max={100}
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-        />
-        <label>Annual Income Range</label>
-        <select value={incomeRange} onChange={(e) => setIncomeRange(e.target.value)}>
-          {INCOME_RANGES.map((r) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-        <label>Investment Horizon</label>
-        <select value={horizon} onChange={(e) => setHorizon(e.target.value)}>
-          {HORIZONS.map((h) => (
-            <option key={h} value={h}>{h}</option>
-          ))}
-        </select>
-        <label>Investment Experience</label>
-        <select value={experience} onChange={(e) => setExperience(e.target.value)}>
-          {EXPERIENCES.map((x) => (
-            <option key={x} value={x}>{x}</option>
-          ))}
-        </select>
+            <h3>2. Financial Profile</h3>
+            <label>Age</label>
+            <input
+              type="number"
+              min={18}
+              max={100}
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+            />
+            <label>Annual Income Range</label>
+            <select value={incomeRange} onChange={(e) => setIncomeRange(e.target.value)}>
+              {INCOME_RANGES.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+            <label>Investment Horizon</label>
+            <select value={horizon} onChange={(e) => setHorizon(e.target.value)}>
+              {HORIZONS.map((h) => (
+                <option key={h} value={h}>{h}</option>
+              ))}
+            </select>
+            <label>Investment Experience</label>
+            <select value={experience} onChange={(e) => setExperience(e.target.value)}>
+              {EXPERIENCES.map((x) => (
+                <option key={x} value={x}>{x}</option>
+              ))}
+            </select>
+          </div>
 
-        <h3>3. Goals & Preferences</h3>
-        <label>Primary Goal</label>
-        <select value={goals} onChange={(e) => setGoals(e.target.value)}>
-          {GOALS.map((g) => (
-            <option key={g} value={g}>{g}</option>
-          ))}
-        </select>
-        <label>Preferred Assets (Optional)</label>
-        <div className="checkbox-grid">
-          {PREFERENCES.map((p) => (
-            <label key={p} className="checkbox-label">
+          <div className="signup-col">
+            <h3>3. Goals & Preferences</h3>
+            <label>Primary Goal</label>
+            <select value={goals} onChange={(e) => setGoals(e.target.value)}>
+              {GOALS.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+            <label>Preferred Assets (Optional)</label>
+            <div className="checkbox-grid">
+              {PREFERENCES.map((p) => (
+                <label key={p} className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={preferences.includes(p)}
+                    onChange={() => togglePreference(p)}
+                  />
+                  {p}
+                </label>
+              ))}
+            </div>
+
+            <h3>4. Risk Assessment</h3>
+            <label>Risk Tolerance: {riskTolerance} / 10</label>
+            <input
+              type="range"
+              min={1}
+              max={10}
+              value={riskTolerance}
+              onChange={(e) => setRiskTolerance(e.target.value)}
+            />
+
+            <label className="checkbox-label agree-label">
               <input
                 type="checkbox"
-                checked={preferences.includes(p)}
-                onChange={() => togglePreference(p)}
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
               />
-              {p}
+              I have read and agree to the Privacy Policy and Terms & Conditions
             </label>
-          ))}
+          </div>
         </div>
-
-        <h3>4. Risk Assessment</h3>
-        <label>Risk Tolerance: {riskTolerance} / 10</label>
-        <input
-          type="range"
-          min={1}
-          max={10}
-          value={riskTolerance}
-          onChange={(e) => setRiskTolerance(e.target.value)}
-        />
-
-        <label className="checkbox-label agree-label">
-          <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
-          I have read and agree to the Privacy Policy and Terms & Conditions
-        </label>
 
         {error && <div className="error">{error}</div>}
 
