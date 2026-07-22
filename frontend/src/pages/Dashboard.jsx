@@ -80,6 +80,11 @@ export default function Dashboard() {
       .catch((e) => setClusterError(e.message));
   }, []);
 
+  function flashSuccess(message) {
+    setHoldingsSuccess(message);
+    setTimeout(() => setHoldingsSuccess(""), 5000);
+  }
+
   async function handleSaveHoldings(e) {
     e.preventDefault();
     setHoldingsError("");
@@ -93,6 +98,7 @@ export default function Dashboard() {
       await saveHoldings(holdingsInput);
       setHoldingsSuccess("Holdings saved. Recalculating your metrics…");
       await loadOverview();
+      flashSuccess("Metrics updated successfully!");
     } catch (err) {
       setHoldingsError(err.message);
     } finally {
@@ -106,8 +112,8 @@ export default function Dashboard() {
     setClearingHoldings(true);
     try {
       await clearHoldings();
-      setHoldingsSuccess("Holdings cleared. Now using the cluster benchmark.");
       await loadOverview();
+      flashSuccess("Holdings cleared. Now using the cluster benchmark.");
     } catch (err) {
       setHoldingsError(err.message);
     } finally {
@@ -211,7 +217,7 @@ export default function Dashboard() {
                 margin: { l: 40, r: 20, t: 20, b: 40 },
                 paper_bgcolor: "rgba(0,0,0,0)",
                 plot_bgcolor: "rgba(0,0,0,0)",
-                font: { family: "Inter", size: 12, color: "#E4E4E7" },
+                font: { family: "Inter, system-ui, sans-serif", size: 12, color: "#E4E4E7" },
                 xaxis: { type: "date", gridcolor: "rgba(255,255,255,0.04)" },
                 yaxis: { tickformat: ".3f", gridcolor: "rgba(255,255,255,0.05)" },
                 shapes: [
@@ -220,6 +226,7 @@ export default function Dashboard() {
                     line: { color: "rgba(255,255,255,0.18)", dash: "dot" },
                   },
                 ],
+                transition: { duration: 500, easing: "cubic-in-out" },
               }}
               config={{ ...PLOTLY_MODEBAR_CONFIG, scrollZoom: true }}
               style={{ width: "100%" }}
@@ -336,7 +343,7 @@ export default function Dashboard() {
                     },
                     textinfo: "percent",
                     textposition: "inside",
-                    insidetextfont: { color: "#0B0B0F", size: 13, family: "Inter" },
+                    insidetextfont: { color: "#0B0B0F", size: 13, family: "Inter, system-ui, sans-serif" },
                     automargin: true,
                   },
                 ]}
@@ -356,6 +363,7 @@ export default function Dashboard() {
                     x: 0.02, y: 0.98, xanchor: "left", yanchor: "top",
                   },
                   margin: { l: 20, r: 20, t: 20, b: 20 },
+                  transition: { duration: 500, easing: "cubic-in-out" },
                 }}
                 config={PLOTLY_MODEBAR_CONFIG}
                 style={{ width: "100%" }}
@@ -385,6 +393,7 @@ export default function Dashboard() {
         </p>
         {clusterData ? (
           <>
+            <div className="chart-card">
             <Plot
               data={[
                 ...Object.entries(
@@ -428,7 +437,7 @@ export default function Dashboard() {
                 height: 500,
                 paper_bgcolor: "rgba(0,0,0,0)",
                 plot_bgcolor: "rgba(0,0,0,0)",
-                font: { family: "Inter", color: "#E4E4E7" },
+                font: { family: "Inter, system-ui, sans-serif", color: "#E4E4E7" },
                 scene: {
                   xaxis: { title: "Age", gridcolor: "rgba(255,255,255,0.08)", backgroundcolor: "rgba(0,0,0,0)" },
                   yaxis: { title: "Risk Score", gridcolor: "rgba(255,255,255,0.08)", backgroundcolor: "rgba(0,0,0,0)" },
@@ -436,18 +445,19 @@ export default function Dashboard() {
                 },
                 margin: { l: 0, r: 0, b: 0, t: 20 },
                 legend: {
-                  title: { text: "Investor Segment" },
+                  title: { text: "Investor Segment", font: { family: "Inter, system-ui, sans-serif", color: "#E4E4E7" } },
                   x: 0.02, y: 0.98, xanchor: "left", yanchor: "top",
                   bgcolor: "rgba(15,10,0,0.85)",
                   bordercolor: "rgba(217,119,6,0.3)",
                   borderwidth: 1,
-                  font: { color: "#E4E4E7" },
+                  font: { family: "Inter, system-ui, sans-serif", color: "#E4E4E7" },
                 },
               }}
               config={PLOTLY_MODEBAR_CONFIG}
               style={{ width: "100%" }}
               useResizeHandler
             />
+            </div>
             <p className="dash-caption">
               Classification based on Age, Risk Score, and Experience Score. Your position (📍)
               is computed by the trained K-Means model.
