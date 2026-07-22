@@ -28,8 +28,10 @@ export default function CandlestickChart({ bars, symbol, isLive, currencyPrefix 
   const xIdx = bars.map((_, i) => i);
 
   const step = Math.max(1, Math.floor(n / 8));
+  // Skip index 0 — its center-anchored label would overflow left past the
+  // plot into the y-axis column, so the first visible tick starts one step in.
   const tickIndices = [];
-  for (let i = 0; i < n; i += step) tickIndices.push(i);
+  for (let i = step; i < n; i += step) tickIndices.push(i);
   const tickLabels = tickIndices.map((i) => {
     const d = new Date(bars[i].timestamp);
     return d.toLocaleString("en-US", { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
@@ -141,7 +143,7 @@ export default function CandlestickChart({ bars, symbol, isLive, currencyPrefix 
         },
         hovermode: "x unified",
         hoverlabel: { bgcolor: "#1a1a2e", font: { color: "#E4E4E7" } },
-        margin: { l: 10, r: 10, t: 55, b: 10 },
+        margin: { l: 10, r: 10, t: 55, b: 10, pad: 8 },
         font: { family: "Inter, system-ui, sans-serif", color: "#E4E4E7" },
         dragmode: "pan",
         bargap: 0,
