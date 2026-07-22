@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import Plot from "react-plotly.js";
-import { getPortfolioOverview } from "../api";
+import { clearHoldings, getPortfolioOverview, saveHoldings } from "../api";
 import "./Dashboard.css";
 
 const BEHAVIORS = {
@@ -32,11 +32,62 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    getPortfolioOverview()
-      .then(setData)
+  const [holdingsInput, setHoldingsInput] = useState("");
+  const [holdingsError, setHoldingsError] = useState("");
+  const [holdingsSuccess, setHoldingsSuccess] = useState("");
+  const [savingHoldings, setSavingHoldings] = useState(false);
+  const [clearingHoldings, setClearingHoldings] = useState(false);
+
+  function loadOverview() {
+    return getPortfolioOverview()
+      .then((d) => {
+        setData(d);
+        const text = d.holdings
+          .map((h) => `${h.ticker}:${h.weight.toFixed(1)}`)
+          .join(", ");
+        setHoldingsInput(text);
+      })
       .catch((e) => setError(e.message));
+  }
+
+  useEffect(() => {
+    loadOverview();
   }, []);
+
+  async function handleSaveHoldings(e) {
+    e.preventDefault();
+    setHoldingsError("");
+    setHoldingsSuccess("");
+    if (!holdingsInput.trim()) {
+      setHoldingsError("Please enter at least one ticker.");
+      return;
+    }
+    setSavingHoldings(true);
+    try {
+      await saveHoldings(holdingsInput);
+      setHoldingsSuccess("Holdings saved. Recalculating your metrics…");
+      await loadOverview();
+    } catch (err) {
+      setHoldingsError(err.message);
+    } finally {
+      setSavingHoldings(false);
+    }
+  }
+
+  async function handleClearHoldings() {
+    setHoldingsError("");
+    setHoldingsSuccess("");
+    setClearingHoldings(true);
+    try {
+      await clearHoldings();
+      setHoldingsSuccess("Holdings cleared. Now using the cluster benchmark.");
+      await loadOverview();
+    } catch (err) {
+      setHoldingsError(err.message);
+    } finally {
+      setClearingHoldings(false);
+    }
+  }
 
   if (error) {
     return (
@@ -132,6 +183,51 @@ export default function Dashboard() {
         ) : (
           <p className="dash-caption">⚠️ Chart unavailable — market data could not be fetched.</p>
         )}
+      </section>
+
+      {/* ── Holdings Input ────────────────────────────────────────────── */}
+      <section className="dash-section">
+        <h2 className="dash-section-title">Invested in More Assets? Let Us Know!</h2>
+        <p className="dash-caption">
+          Enter the assets you hold and AIPRS will calculate your actual portfolio metrics.
+          Use <code>TICKER:WEIGHT%</code> format (e.g. <code>AAPL:50, MSFT:30, OGDC.KA:20</code>),
+          or just ticker names for equal weighting (e.g. <code>AAPL, MSFT, OGDC.KA</code>).
+          PSX tickers must end with <code>.KA</code>.
+        </p>
+
+        {data.holdings.length > 0 && (
+          <div className="holdings-pills">
+            {data.holdings.map((h) => (
+              <span key={h.ticker} className="holdings-pill">
+                {h.ticker} {h.weight.toFixed(1)}%
+              </span>
+            ))}
+          </div>
+        )}
+
+        <form onSubmit={handleSaveHoldings} className="holdings-form">
+          <input
+            type="text"
+            value={holdingsInput}
+            onChange={(e) => setHoldingsInput(e.target.value)}
+            placeholder="e.g. AAPL:50, MSFT:30, OGDC.KA:20  or  AAPL, MSFT, OGDC.KA"
+          />
+          {holdingsError && <div className="error">{holdingsError}</div>}
+          {holdingsSuccess && <div className="success">{holdingsSuccess}</div>}
+          <div className="holdings-actions">
+            <button type="submit" disabled={savingHoldings}>
+              {savingHoldings ? "Saving…" : "Save & Recalculate"}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleClearHoldings}
+              disabled={clearingHoldings}
+            >
+              {clearingHoldings ? "Clearing…" : "Clear Holdings"}
+            </button>
+          </div>
+        </form>
       </section>
 
       {/* ── Profile Summary ───────────────────────────────────────────── */}

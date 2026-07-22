@@ -59,3 +59,14 @@ export function deleteAccount(password) {
 export function getPortfolioOverview() {
   return request("/portfolio/overview");
 }
+
+export function saveHoldings(holdingsText) {
+  return request("/users/me/holdings", {
+    method: "PUT",
+    body: JSON.stringify({ holdings_text: holdingsText }),
+  });
+}
+
+export function clearHoldings() {
+  return request("/users/me/holdings", { method: "DELETE" });
+}

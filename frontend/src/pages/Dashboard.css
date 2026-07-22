@@ -130,6 +130,51 @@
   font-weight: 600;
 }
 
+.dash-caption code {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 12px;
+}
+
+.holdings-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.holdings-pill {
+  background: rgba(217, 119, 6, 0.15);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 12px;
+  color: var(--secondary-light);
+}
+
+.holdings-form {
+  margin-top: 16px;
+  max-width: 600px;
+}
+
+.holdings-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.holdings-actions button {
+  flex: 1;
+  margin-top: 0;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text);
+}
+
 @media (max-width: 700px) {
   .metrics-grid {
     grid-template-columns: 1fr;

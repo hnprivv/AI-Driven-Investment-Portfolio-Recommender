@@ -32,6 +32,57 @@ def classify_ticker(ticker: str) -> str:
     return TICKER_CATEGORY_MAP.get(ticker.upper(), "Equities")
 
 
+def parse_holdings_input(text: str) -> tuple[list[dict], str | None]:
+    """Parses 'AAPL:40, MSFT:30, OGDC.KA:30' or 'AAPL, MSFT' (equal weight).
+    Mirrors pages/1_Overview.py's parse_holdings_input exactly.
+    Returns (holdings_list, error_msg)."""
+    parts = [p.strip() for p in text.split(",") if p.strip()]
+    if not parts:
+        return [], "Please enter at least one ticker."
+
+    holdings = []
+    has_any_colon = any(":" in p for p in parts)
+
+    for part in parts:
+        if ":" in part:
+            bits = part.split(":", 1)
+            ticker = bits[0].strip().upper()
+            if not ticker:
+                return [], "Ticker cannot be empty."
+            try:
+                weight = float(bits[1].strip())
+            except ValueError:
+                return [], f"Invalid weight for '{ticker}' — use a number."
+            if weight <= 0:
+                return [], f"Weight for '{ticker}' must be greater than 0."
+            holdings.append({"ticker": ticker, "weight": weight})
+        else:
+            ticker = part.strip().upper()
+            if not ticker:
+                continue
+            if has_any_colon:
+                return [], "Please specify weights for all tickers or none."
+            holdings.append({"ticker": ticker, "weight": None})
+
+    if not holdings:
+        return [], "No valid tickers found."
+
+    if any(h["weight"] is None for h in holdings):
+        equal_w = round(100 / len(holdings), 4)
+        for h in holdings:
+            h["weight"] = equal_w
+
+    total = sum(h["weight"] for h in holdings)
+    if abs(total - 100) > 2:
+        return [], f"Weights sum to {total:.1f}% but must sum to 100%."
+
+    for h in holdings:
+        h["weight"] = round(h["weight"] / total * 100, 4)
+        h["market"] = "PSX" if h["ticker"].endswith(".KA") else "US"
+
+    return holdings, None
+
+
 def compute_portfolio_metrics(
     price_series: dict, weights_map: dict
 ) -> tuple[float | None, float | None, float | None, pd.Series | None]:

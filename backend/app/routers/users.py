@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from app.auth import get_current_username, verify_password
 from app.db import delete_user, get_user_by_name, update_user
+from app.portfolio import parse_holdings_input
 
 router = APIRouter()
 
@@ -45,6 +46,31 @@ def change_password(
     if not update_user(username, {"password": new_hash}):
         raise HTTPException(status_code=500, detail="Could not update password")
     return {"ok": True}
+
+
+class HoldingsRequest(BaseModel):
+    holdings_text: str
+
+
+@router.put("/me/holdings")
+def save_holdings(body: HoldingsRequest, username: str = Depends(get_current_username)):
+    if not body.holdings_text.strip():
+        raise HTTPException(status_code=400, detail="Please enter at least one ticker.")
+
+    parsed, err = parse_holdings_input(body.holdings_text)
+    if err:
+        raise HTTPException(status_code=400, detail=err)
+
+    if not update_user(username, {"holdings": parsed}):
+        raise HTTPException(status_code=500, detail="Could not save holdings")
+    return {"holdings": parsed}
+
+
+@router.delete("/me/holdings")
+def clear_holdings(username: str = Depends(get_current_username)):
+    if not update_user(username, {"holdings": []}):
+        raise HTTPException(status_code=500, detail="Could not clear holdings")
+    return {"holdings": []}
 
 
 class DeleteAccountRequest(BaseModel):
