@@ -1,27 +1,11 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { changePassword, deleteAccount, getFullProfile } from "../api";
+import { useState } from "react";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { changePassword, deleteAccount } from "../api";
 import "./Settings.css";
-
-const CLUSTER_LABELS = { 0: "Conservative", 1: "Moderate", 2: "Aggressive", 3: "Very Aggressive" };
-const BADGE_COLORS = {
-  Conservative: "#16a34a", Moderate: "#FFE600",
-  Aggressive: "#ff8400", "Very Aggressive": "#b71212",
-};
-
-function fmtDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  } catch {
-    return "—";
-  }
-}
 
 export default function Settings() {
   const { onLogout } = useOutletContext();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
 
   // Change password form
   const [currentPassword, setCurrentPassword] = useState("");
@@ -35,10 +19,6 @@ export default function Settings() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-
-  useEffect(() => {
-    getFullProfile().then(setProfile).catch(() => {});
-  }, []);
 
   async function handlePasswordSubmit(e) {
     e.preventDefault();
@@ -72,19 +52,6 @@ export default function Settings() {
     }
   }
 
-  function handleExport() {
-    if (!profile) return;
-    const blob = new Blob([JSON.stringify(profile, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `aiprs_profile_${(profile.name || "user").toLowerCase().replace(/\s+/g, "_")}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
   async function handleDelete(e) {
     e.preventDefault();
     setDeleteError("");
@@ -104,52 +71,21 @@ export default function Settings() {
     }
   }
 
-  const riskProfile = profile ? CLUSTER_LABELS[profile.cluster] || "Moderate" : null;
-  const badgeColor = riskProfile ? BADGE_COLORS[riskProfile] : "#F59E0B";
-
   return (
     <div className="page-shell">
       <div className="page-shell-inner">
         <h1>Settings</h1>
-        <p className="subtitle">Manage your account, notifications, and data.</p>
-
-        {/* ── Account Overview ──────────────────────────────────────────── */}
-        <section className="dash-section">
-          <h2 className="dash-section-title">Account Overview</h2>
-          {profile ? (
-            <div className="chart-card">
-              <div className="account-grid">
-                <div>
-                  <span className="metric-label">Name</span>
-                  <span className="account-value">{profile.name}</span>
-                </div>
-                <div>
-                  <span className="metric-label">Email</span>
-                  <span className="account-value">{profile.email || "—"}</span>
-                </div>
-                <div>
-                  <span className="metric-label">Member Since</span>
-                  <span className="account-value">{fmtDate(profile.created_at)}</span>
-                </div>
-                <div>
-                  <span className="metric-label">Risk Profile</span>
-                  <span className="risk-badge" style={{ "--badge-color": badgeColor }}>
-                    ● {riskProfile}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="dash-caption">Loading your profile…</p>
-          )}
-        </section>
-
-        <div className="dash-divider"><span>◆</span></div>
+        <p className="subtitle">
+          Manage your account and password.{" "}
+          <Link to="/profile" className="settings-profile-link">
+            Edit your profile & preferences →
+          </Link>
+        </p>
 
         {/* ── Change Password ───────────────────────────────────────────── */}
         <section className="dash-section">
           <h2 className="dash-section-title">🔑 Change Password</h2>
-          <form onSubmit={handlePasswordSubmit} className="chart-card settings-form">
+          <form onSubmit={handlePasswordSubmit} className="chart-card settings-form centered">
             <label className="field-label" htmlFor="current-pw">Current Password</label>
             <input
               id="current-pw"
@@ -182,26 +118,10 @@ export default function Settings() {
 
         <div className="dash-divider"><span>◆</span></div>
 
-        {/* ── Export Profile Data ───────────────────────────────────────── */}
-        <section className="dash-section">
-          <h2 className="dash-section-title">📤 Export Profile Data</h2>
-          <div className="chart-card settings-form">
-            <p className="dash-caption" style={{ margin: "0 0 14px" }}>
-              Download a copy of your AIPRS profile as a JSON file. Your password is excluded from
-              the export.
-            </p>
-            <button onClick={handleExport} disabled={!profile} style={{ width: "100%" }}>
-              ⬇️ Download My Data
-            </button>
-          </div>
-        </section>
-
-        <div className="dash-divider"><span>◆</span></div>
-
         {/* ── Danger Zone ────────────────────────────────────────────────── */}
         <section className="dash-section">
-          <h2 className="dash-section-title danger-title">⚠️ Danger Zone</h2>
-          <div className="danger-card">
+          <h2 className="dash-section-title danger-title centered-title">⚠️ Danger Zone</h2>
+          <div className="danger-card centered">
             <p className="dash-caption" style={{ margin: "0 0 14px", color: "#f1a3a3" }}>
               Deleting your account is <b>permanent and cannot be undone</b>. All your profile data,
               risk assessments, and preferences will be removed.

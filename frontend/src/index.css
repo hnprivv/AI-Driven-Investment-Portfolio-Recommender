@@ -161,7 +161,22 @@ body {
   font-weight: 600;
 }
 
+.custom-select-option.multi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-select-option.multi input {
+  pointer-events: none;
+}
+
+.custom-select-placeholder {
+  color: var(--muted);
+}
+
 input[type="range"] {
+  width: 100%;
   padding: 0;
   accent-color: var(--secondary);
 }
@@ -247,7 +262,7 @@ label {
   margin-top: 10px;
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 textarea,
 select {
   width: 100%;

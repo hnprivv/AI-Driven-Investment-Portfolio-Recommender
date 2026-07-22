@@ -1,0 +1,70 @@
+@import "./shared.css";
+
+.account-card {
+  padding-bottom: 18px;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  text-align: center;
+}
+
+.account-grid .risk-badge {
+  display: block;
+  width: fit-content;
+  margin: 4px auto 0;
+}
+
+.account-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.edit-profile-form {
+  max-width: 720px;
+}
+
+.edit-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 32px;
+  align-items: start;
+}
+
+.edit-profile-grid label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.edit-profile-field {
+  min-width: 0;
+}
+
+.edit-profile-full-row {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.edit-profile-full-row label {
+  margin-top: 0;
+}
+
+@media (max-width: 700px) {
+  .account-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .edit-profile-grid {
+    grid-template-columns: 1fr;
+  }
+}

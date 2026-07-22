@@ -1,21 +1,21 @@
 @import "./shared.css";
 
-.account-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+.settings-profile-link {
+  color: var(--secondary);
+  font-weight: 600;
+  text-decoration: none;
 }
 
-.account-value {
-  display: block;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-  margin-top: 2px;
+.settings-profile-link:hover {
+  text-decoration: underline;
 }
 
 .settings-form {
   max-width: 480px;
+}
+
+.settings-form.centered {
+  margin: 0 auto;
 }
 
 .field-label {
@@ -23,6 +23,10 @@
   font-size: 13px;
   color: var(--muted);
   margin-bottom: 6px;
+}
+
+.centered-title {
+  text-align: center;
 }
 
 .danger-title {
@@ -41,8 +45,6 @@
   box-shadow: 0 0 18px rgba(220, 38, 38, 0.08);
 }
 
-@media (max-width: 700px) {
-  .account-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+.danger-card.centered {
+  margin: 0 auto;
 }

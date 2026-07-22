@@ -39,6 +39,13 @@ export function getFullProfile() {
   return request("/users/me");
 }
 
+export function updateProfile(payload) {
+  return request("/users/me/profile", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function changePassword(currentPassword, newPassword) {
   return request("/users/me/password", {
     method: "PUT",

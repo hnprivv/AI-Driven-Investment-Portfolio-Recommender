@@ -51,30 +51,6 @@
   font-weight: 500;
 }
 
-.risk-badge-row {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.risk-badge-label {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.risk-badge {
-  background: color-mix(in srgb, var(--badge-color) 15%, transparent);
-  color: var(--badge-color);
-  border: 1px solid color-mix(in srgb, var(--badge-color) 40%, transparent);
-  border-radius: 20px;
-  padding: 3px 14px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  box-shadow: 0 0 16px color-mix(in srgb, var(--badge-color) 35%, transparent);
-}
-
 .behavior-box {
   margin-top: 18px;
   background: linear-gradient(135deg, rgba(217, 119, 6, 0.07), rgba(255, 255, 255, 0.01));

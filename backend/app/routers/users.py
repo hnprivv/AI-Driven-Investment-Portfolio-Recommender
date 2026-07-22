@@ -1,8 +1,11 @@
+from typing import List
+
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field
 
 from app.auth import get_current_username, verify_password
+from app.clustering import predict_user_cluster
 from app.db import delete_user, get_user_by_name, update_user
 from app.portfolio import parse_holdings_input
 
@@ -46,6 +49,42 @@ def change_password(
     if not update_user(username, {"password": new_hash}):
         raise HTTPException(status_code=500, detail="Could not update password")
     return {"ok": True}
+
+
+class ProfileUpdateRequest(BaseModel):
+    age: int = Field(ge=18, le=100)
+    income_range: str
+    investment_horizon: str
+    experience: str
+    goals: str
+    preferences: List[str] = []
+    risk_tolerance: int = Field(ge=1, le=10)
+
+
+@router.put("/me/profile")
+def update_profile(body: ProfileUpdateRequest, username: str = Depends(get_current_username)):
+    cluster = predict_user_cluster(
+        age=body.age,
+        income_range=body.income_range,
+        risk_tolerance=body.risk_tolerance,
+        horizon=body.investment_horizon,
+        experience=body.experience,
+    )
+    updates = {
+        "age": body.age,
+        "income_range": body.income_range,
+        "investment_horizon": body.investment_horizon,
+        "experience": body.experience,
+        "goals": body.goals,
+        "preferences": body.preferences,
+        "risk_tolerance": body.risk_tolerance,
+        "cluster": cluster,
+    }
+    if not update_user(username, updates):
+        raise HTTPException(status_code=500, detail="Could not update profile")
+
+    user = get_user_by_name(username)
+    return _serialise(user)
 
 
 class HoldingsRequest(BaseModel):
