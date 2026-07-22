@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 
 from app.auth import get_current_username
+from app.clustering import EXPERIENCE_MAP, get_cluster_background
 from app.db import get_user_by_name
 from app.market_data import fetch_bars, fetch_ticker
+from app.pdf_report import generate_pdf_report
 from app.portfolio import (
     ASSET_TICKERS,
     BADGE_COLORS,
@@ -18,12 +21,8 @@ router = APIRouter()
 _FALLBACK = {"return": 0.128, "vol": 0.082, "sharpe": 1.42}
 
 
-@router.get("/overview")
-def get_overview(username: str = Depends(get_current_username)):
-    user = get_user_by_name(username)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
+def _compute_overview_data(user: dict) -> dict:
+    """Shared by both /overview (JSON) and /report.pdf so the two never drift apart."""
     user_cluster = int(user.get("cluster", 1))
     risk_profile = CLUSTER_LABELS.get(user_cluster, "Moderate")
     allocation = CLUSTER_ALLOCATIONS.get(user_cluster, CLUSTER_ALLOCATIONS[1])
@@ -113,4 +112,49 @@ def get_overview(username: str = Depends(get_current_username)):
         "holdings": saved_holdings,
         "holdings_by_category": holdings_by_category,
         "failed_holdings": failed_holdings,
+    }
+
+
+@router.get("/overview")
+def get_overview(username: str = Depends(get_current_username)):
+    user = get_user_by_name(username)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return _compute_overview_data(user)
+
+
+@router.get("/report.pdf")
+def get_report_pdf(username: str = Depends(get_current_username)):
+    user = get_user_by_name(username)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    overview = _compute_overview_data(user)
+    pdf_bytes = generate_pdf_report(username=username, user=user, overview=overview)
+
+    filename = f"aiprs_report_{username.lower().replace(' ', '_')}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/cluster-placement")
+def get_cluster_placement(username: str = Depends(get_current_username)):
+    user = get_user_by_name(username)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    background = get_cluster_background()
+    if background is None:
+        raise HTTPException(status_code=404, detail="Pre-trained AI models not found.")
+
+    return {
+        "background": background,
+        "user_point": {
+            "age": user.get("age", 30),
+            "risk_score": user.get("risk_tolerance", 5),
+            "exp_score": EXPERIENCE_MAP.get(user.get("experience", "Beginner"), 1),
+        },
     }

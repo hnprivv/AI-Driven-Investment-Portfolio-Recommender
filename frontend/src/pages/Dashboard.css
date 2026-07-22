@@ -39,7 +39,7 @@
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 
@@ -64,6 +64,23 @@
   font-size: 24px;
   font-weight: 700;
   color: var(--text);
+}
+
+.metric-card-report {
+  justify-content: center;
+}
+
+.pdf-download-btn {
+  display: inline-block;
+  text-align: center;
+  margin-top: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
 }
 
 .profile-grid {

@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import Plot from "react-plotly.js";
-import { clearHoldings, getPortfolioOverview, saveHoldings } from "../api";
+import {
+  API_BASE,
+  clearHoldings,
+  getClusterPlacement,
+  getPortfolioOverview,
+  saveHoldings,
+} from "../api";
 import "./Dashboard.css";
 
 const BEHAVIORS = {
@@ -26,6 +32,13 @@ const CATEGORY_COLORS = {
   "Cash": "#78350F",
 };
 
+const PROFILE_COLORS = {
+  Conservative: "#FDE68A",
+  Moderate: "#F59E0B",
+  Aggressive: "#B45309",
+  "Very Aggressive": "#7C2D12",
+};
+
 const PLOTLY_MODEBAR_CONFIG = {
   displaylogo: false,
   modeBarButtonsToRemove: [
@@ -45,6 +58,9 @@ export default function Dashboard() {
   const [savingHoldings, setSavingHoldings] = useState(false);
   const [clearingHoldings, setClearingHoldings] = useState(false);
 
+  const [clusterData, setClusterData] = useState(null);
+  const [clusterError, setClusterError] = useState("");
+
   function loadOverview() {
     return getPortfolioOverview()
       .then((d) => {
@@ -59,6 +75,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadOverview();
+    getClusterPlacement()
+      .then(setClusterData)
+      .catch((e) => setClusterError(e.message));
   }, []);
 
   async function handleSaveHoldings(e) {
@@ -142,6 +161,17 @@ export default function Dashboard() {
           <div className="metric-card">
             <span className="metric-label">Sharpe Ratio</span>
             <span className="metric-value">{data.sharpe.toFixed(2)}</span>
+          </div>
+          <div className="metric-card metric-card-report">
+            <span className="metric-label">Portfolio Report</span>
+            <a
+              className="pdf-download-btn"
+              href={`${API_BASE}/portfolio/report.pdf`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              ⬇ Download PDF
+            </a>
           </div>
         </div>
         <p className="dash-caption">
@@ -323,6 +353,89 @@ export default function Dashboard() {
             Add your holdings above to see your actual allocation breakdown here — or visit{" "}
             <b>AI Recommendations</b> for a personalized suggested allocation.
           </div>
+        )}
+      </section>
+
+      {/* ── AI Cluster Placement ──────────────────────────────────────── */}
+      <section className="dash-section">
+        <h2 className="dash-section-title">🧩 Your AI Cluster Placement</h2>
+        <p className="dash-caption" style={{ margin: "0 0 16px" }}>
+          Where you sit among all investor profiles in the K-Means model's decision space.
+        </p>
+        {clusterData ? (
+          <>
+            <Plot
+              data={[
+                ...Object.entries(
+                  clusterData.background.reduce((acc, p) => {
+                    (acc[p.profile] ||= []).push(p);
+                    return acc;
+                  }, {})
+                ).map(([profile, points]) => ({
+                  type: "scatter3d",
+                  mode: "markers",
+                  name: profile,
+                  x: points.map((p) => p.age),
+                  y: points.map((p) => p.risk_score),
+                  z: points.map((p) => p.exp_score),
+                  marker: {
+                    size: 4,
+                    opacity: 0.6,
+                    color: PROFILE_COLORS[profile] || "#F59E0B",
+                  },
+                })),
+                {
+                  type: "scatter3d",
+                  mode: "markers+text",
+                  name: "Your Profile",
+                  x: [clusterData.user_point.age],
+                  y: [clusterData.user_point.risk_score],
+                  z: [clusterData.user_point.exp_score],
+                  text: ["📍 YOU"],
+                  textposition: "top center",
+                  textfont: { color: "#FFFFFF", size: 14 },
+                  marker: {
+                    size: 12,
+                    color: "#16a34a",
+                    symbol: "diamond",
+                    line: { color: "#FFFFFF", width: 2 },
+                  },
+                },
+              ]}
+              layout={{
+                autosize: true,
+                height: 500,
+                paper_bgcolor: "rgba(0,0,0,0)",
+                plot_bgcolor: "rgba(0,0,0,0)",
+                font: { family: "Inter", color: "#E4E4E7" },
+                scene: {
+                  xaxis: { title: "Age", gridcolor: "rgba(255,255,255,0.08)", backgroundcolor: "rgba(0,0,0,0)" },
+                  yaxis: { title: "Risk Score", gridcolor: "rgba(255,255,255,0.08)", backgroundcolor: "rgba(0,0,0,0)" },
+                  zaxis: { title: "Experience Score", gridcolor: "rgba(255,255,255,0.08)", backgroundcolor: "rgba(0,0,0,0)" },
+                },
+                margin: { l: 0, r: 0, b: 0, t: 20 },
+                legend: {
+                  title: { text: "Investor Segment" },
+                  x: 0.02, y: 0.98, xanchor: "left", yanchor: "top",
+                  bgcolor: "rgba(15,10,0,0.85)",
+                  bordercolor: "rgba(217,119,6,0.3)",
+                  borderwidth: 1,
+                  font: { color: "#E4E4E7" },
+                },
+              }}
+              config={PLOTLY_MODEBAR_CONFIG}
+              style={{ width: "100%" }}
+              useResizeHandler
+            />
+            <p className="dash-caption">
+              Classification based on Age, Risk Score, and Experience Score. Your position (📍)
+              is computed by the trained K-Means model.
+            </p>
+          </>
+        ) : clusterError ? (
+          <p className="dash-caption">⚠️ {clusterError}</p>
+        ) : (
+          <p className="dash-caption">Loading cluster visualisation…</p>
         )}
       </section>
     </div>

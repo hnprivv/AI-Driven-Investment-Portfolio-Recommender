@@ -8,3 +8,7 @@ python-dotenv
 joblib
 pandas
 scikit-learn
+plotly
+kaleido
+fpdf2
+yfinance

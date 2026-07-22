@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+export const API_BASE = "http://localhost:8000";
 
 async function request(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -58,6 +58,10 @@ export function deleteAccount(password) {
 
 export function getPortfolioOverview() {
   return request("/portfolio/overview");
+}
+
+export function getClusterPlacement() {
+  return request("/portfolio/cluster-placement");
 }
 
 export function saveHoldings(holdingsText) {

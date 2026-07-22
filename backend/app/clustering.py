@@ -1,7 +1,11 @@
 import os
+from functools import lru_cache
 
 import joblib
+import numpy as np
 import pandas as pd
+
+from app.portfolio import CLUSTER_LABELS
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MODEL_DIR = os.path.join(ROOT, "modules", "model")
@@ -37,3 +41,42 @@ def predict_user_cluster(
         return int(cluster_id)
     except Exception:
         return 0
+
+
+@lru_cache(maxsize=1)
+def get_cluster_background(n: int = 150, seed: int = 42) -> list[dict] | None:
+    """150 synthetic investor profiles classified by the trained K-Means model,
+    used as the background scatter for the 3D cluster-placement chart. Mirrors
+    pages/1_Overview.py's AI CLUSTER PLACEMENT section exactly (same seed, same
+    feature ranges), so the point cloud is pixel-for-pixel identical. Cached
+    since it's fully deterministic and only needs computing once per process.
+    """
+    model_path = os.path.join(MODEL_DIR, "kmeans_model.pkl")
+    scaler_path = os.path.join(MODEL_DIR, "scaler.pkl")
+    if not os.path.exists(model_path) or not os.path.exists(scaler_path):
+        return None
+
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
+
+    rng = np.random.RandomState(seed)  # same sequence as Streamlit's np.random.seed(42)
+    bg_df = pd.DataFrame({
+        "Age": rng.randint(18, 75, n),
+        "Income_Score": rng.randint(1, 5, n),
+        "Risk_Score": rng.randint(1, 11, n),
+        "Horizon_Score": rng.choice([1, 3, 5, 10], n),
+        "Exp_Score": rng.randint(1, 4, n),
+    })
+    bg_df["Cluster"] = model.predict(scaler.transform(bg_df))
+    bg_df["Profile"] = bg_df["Cluster"].map(CLUSTER_LABELS)
+
+    return [
+        {
+            "age": int(row.Age),
+            "risk_score": int(row.Risk_Score),
+            "exp_score": int(row.Exp_Score),
+            "cluster": int(row.Cluster),
+            "profile": row.Profile,
+        }
+        for row in bg_df.itertuples()
+    ]
