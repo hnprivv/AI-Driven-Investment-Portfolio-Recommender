@@ -38,6 +38,10 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Content-Disposition carries the PDF report's server-chosen filename —
+    # browsers hide response headers from JS by default unless explicitly
+    # exposed, even same-origin-looking ones on a cross-site fetch.
+    expose_headers=["Content-Disposition"],
 )
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])

@@ -117,11 +117,14 @@ export async function downloadReportPdf() {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.detail || "Could not generate report");
   }
+  const disposition = res.headers.get("Content-Disposition") || "";
+  const filenameMatch = disposition.match(/filename="?([^"]+)"?/);
+  const filename = filenameMatch ? filenameMatch[1] : "aiprs_report.pdf";
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "aiprs_portfolio_report.pdf";
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
