@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { me, signup } from "../api";
 import Select from "../components/Select";
 import NumberInput from "../components/NumberInput";
+import Footer from "../components/Footer";
 
 const INCOME_RANGES = ["< 25,000", "25,000 - 50,000", "50,000 - 100,000", "100,000+"];
 const HORIZONS = ["1 Year", "3-5 Years", "5-10 Years", "10+ Years"];
@@ -97,6 +98,7 @@ export default function Signup({ onLogin }) {
   }
 
   return (
+    <>
     <div className="auth-page">
       <form className="auth-card signup-card" onSubmit={handleSubmit}>
         <h1>Create Your Profile</h1>
@@ -124,18 +126,8 @@ export default function Signup({ onLogin }) {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-
             <h3>2. Financial Profile</h3>
-            <label>Age</label>
-            <NumberInput value={age} onChange={setAge} min={18} max={100} />
-            <label>Annual Income Range</label>
-            <Select value={incomeRange} onChange={setIncomeRange} options={INCOME_RANGES} />
-            <label>Investment Horizon</label>
-            <Select value={horizon} onChange={setHorizon} options={HORIZONS} />
-            <label>Investment Experience</label>
-            <Select value={experience} onChange={setExperience} options={EXPERIENCES} />
           </div>
-
           <div className="signup-col">
             <h3>3. Goals & Preferences</h3>
             <label>Primary Goal</label>
@@ -175,6 +167,42 @@ export default function Signup({ onLogin }) {
           </div>
         </div>
 
+        <div className="signup-columns signup-row-tight">
+          <div className="signup-col">
+            <label>Age</label>
+            <NumberInput value={age} onChange={setAge} min={18} max={100} />
+          </div>
+          <div className="signup-col">
+            <label className="legal-link-label">&nbsp;</label>
+            <Link to="/privacy" state={{ from: "signup" }} className="legal-link-btn-inline">
+              Privacy Policy
+            </Link>
+          </div>
+        </div>
+
+        <div className="signup-columns signup-row-tight">
+          <div className="signup-col">
+            <label>Annual Income Range</label>
+            <Select value={incomeRange} onChange={setIncomeRange} options={INCOME_RANGES} />
+          </div>
+          <div className="signup-col">
+            <label className="legal-link-label">&nbsp;</label>
+            <Link to="/terms" state={{ from: "signup" }} className="legal-link-btn-inline">
+              Terms & Conditions
+            </Link>
+          </div>
+        </div>
+
+        <div className="signup-columns">
+          <div className="signup-col">
+            <label>Investment Horizon</label>
+            <Select value={horizon} onChange={setHorizon} options={HORIZONS} />
+            <label>Investment Experience</label>
+            <Select value={experience} onChange={setExperience} options={EXPERIENCES} />
+          </div>
+          <div className="signup-col" />
+        </div>
+
         {error && <div className="error">{error}</div>}
 
         <button type="submit" disabled={submitting}>
@@ -187,5 +215,7 @@ export default function Signup({ onLogin }) {
         </p>
       </form>
     </div>
+    <Footer />
+    </>
   );
 }

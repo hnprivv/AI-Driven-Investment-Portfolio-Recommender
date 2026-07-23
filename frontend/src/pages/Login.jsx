@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { login, me } from "../api";
+import Footer from "../components/Footer";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -24,6 +25,7 @@ export default function Login({ onLogin }) {
   }
 
   return (
+    <>
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>AIPRS</h1>
@@ -57,5 +59,7 @@ export default function Login({ onLogin }) {
         </p>
       </form>
     </div>
+    <Footer />
+    </>
   );
 }

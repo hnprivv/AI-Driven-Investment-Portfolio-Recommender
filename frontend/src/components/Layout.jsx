@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 export default function Layout({ user, onLogout, onUserUpdate }) {
   if (!user) return <Navigate to="/login" />;
@@ -10,6 +11,7 @@ export default function Layout({ user, onLogout, onUserUpdate }) {
       <main className="page-content">
         <Outlet context={{ user, onLogout, onUserUpdate }} />
       </main>
+      <Footer />
     </>
   );
 }

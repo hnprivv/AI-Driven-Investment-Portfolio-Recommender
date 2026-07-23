@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 
-from app.auth import get_current_username
+from app.auth import get_current_email
 from app.clustering import EXPERIENCE_MAP, get_cluster_background
-from app.db import get_user_by_name
+from app.db import get_user_by_email
 from app.market_data import fetch_bars, fetch_ticker
 from app.pdf_report import generate_pdf_report
 from app.portfolio import (
@@ -116,23 +116,24 @@ def _compute_overview_data(user: dict) -> dict:
 
 
 @router.get("/overview")
-def get_overview(username: str = Depends(get_current_username)):
-    user = get_user_by_name(username)
+def get_overview(email: str = Depends(get_current_email)):
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return _compute_overview_data(user)
 
 
 @router.get("/report.pdf")
-def get_report_pdf(username: str = Depends(get_current_username)):
-    user = get_user_by_name(username)
+def get_report_pdf(email: str = Depends(get_current_email)):
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     overview = _compute_overview_data(user)
-    pdf_bytes = generate_pdf_report(username=username, user=user, overview=overview)
+    display_name = user.get("name", "")
+    pdf_bytes = generate_pdf_report(username=display_name, user=user, overview=overview)
 
-    filename = f"aiprs_report_{username.lower().replace(' ', '_')}.pdf"
+    filename = f"aiprs_report_{display_name.lower().replace(' ', '_') or 'user'}.pdf"
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
@@ -141,8 +142,8 @@ def get_report_pdf(username: str = Depends(get_current_username)):
 
 
 @router.get("/cluster-placement")
-def get_cluster_placement(username: str = Depends(get_current_username)):
-    user = get_user_by_name(username)
+def get_cluster_placement(email: str = Depends(get_current_email)):
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 

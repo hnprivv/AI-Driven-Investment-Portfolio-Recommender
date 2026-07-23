@@ -4,9 +4,9 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from app.auth import create_session_token, get_current_username, verify_password
+from app.auth import create_session_token, get_current_email, verify_password
 from app.clustering import predict_user_cluster
-from app.db import delete_user, get_user_by_email, get_user_by_name, update_user
+from app.db import delete_user, get_user_by_email, update_user
 from app.email_service import (
     send_account_deleted_email,
     send_credentials_updated_email,
@@ -28,8 +28,8 @@ def _serialise(user: dict) -> dict:
 
 
 @router.get("/me")
-def get_profile(username: str = Depends(get_current_username)):
-    user = get_user_by_name(username)
+def get_profile(email: str = Depends(get_current_email)):
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return _serialise(user)
@@ -42,9 +42,9 @@ class ChangePasswordRequest(BaseModel):
 
 @router.put("/me/password")
 def change_password(
-    body: ChangePasswordRequest, username: str = Depends(get_current_username)
+    body: ChangePasswordRequest, email: str = Depends(get_current_email)
 ):
-    user = get_user_by_name(username)
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -52,11 +52,11 @@ def change_password(
         raise HTTPException(status_code=401, detail="Current password is incorrect")
 
     new_hash = bcrypt.hashpw(body.new_password.encode("utf-8"), bcrypt.gensalt()).decode()
-    if not update_user(username, {"password": new_hash}):
+    if not update_user(email, {"password": new_hash}):
         raise HTTPException(status_code=500, detail="Could not update password")
 
-    if user.get("email_opt_in") and user.get("email"):
-        send_credentials_updated_email(username, user["email"], "password")
+    if user.get("email_opt_in"):
+        send_credentials_updated_email(user.get("name", ""), email, "password")
 
     return {"ok": True}
 
@@ -71,9 +71,9 @@ class AccountUpdateRequest(BaseModel):
 def update_account(
     body: AccountUpdateRequest,
     response: Response,
-    username: str = Depends(get_current_username),
+    email: str = Depends(get_current_email),
 ):
-    user = get_user_by_name(username)
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -84,29 +84,28 @@ def update_account(
     if not EMAIL_RE.match(new_email):
         raise HTTPException(status_code=400, detail="Please enter a valid email address.")
 
-    email_changed = new_email != user.get("email", "")
+    email_changed = new_email != email
     if email_changed:
         if not body.password:
             raise HTTPException(status_code=400, detail="Please enter your password to change your email.")
         if not verify_password(body.password, user.get("password", "")):
             raise HTTPException(status_code=401, detail="Incorrect password.")
-        existing = get_user_by_email(new_email)
-        if existing is not None and existing.get("name") != username:
+        if get_user_by_email(new_email) is not None:
             raise HTTPException(status_code=409, detail="An account with this email already exists.")
 
-    if not update_user(username, {"name": new_name, "email": new_email}):
+    if not update_user(email, {"name": new_name, "email": new_email}):
         raise HTTPException(status_code=500, detail="Could not update account")
 
-    if email_changed and user.get("email_opt_in") and user.get("email"):
+    if email_changed and user.get("email_opt_in"):
         send_credentials_updated_email(
-            username, user["email"], "email",
+            new_name, email, "email",
             extra=f"It was changed to {new_email}.",
         )
 
-    # "name" doubles as the session identity, so a rename invalidates the
-    # current cookie's subject — reissue it against the new name.
-    if new_name != username:
-        token = create_session_token(new_name)
+    # The session's identity is the email — a change invalidates the
+    # current cookie's subject, so reissue it against the new email.
+    if email_changed:
+        token = create_session_token(new_email)
         response.set_cookie(
             key="aiprs_session",
             value=token,
@@ -115,7 +114,7 @@ def update_account(
             max_age=24 * 3600,
         )
 
-    updated = get_user_by_name(new_name)
+    updated = get_user_by_email(new_email)
     return _serialise(updated)
 
 
@@ -125,9 +124,9 @@ class EmailPreferenceRequest(BaseModel):
 
 @router.put("/me/email-preference")
 def update_email_preference(
-    body: EmailPreferenceRequest, username: str = Depends(get_current_username)
+    body: EmailPreferenceRequest, email: str = Depends(get_current_email)
 ):
-    if not update_user(username, {"email_opt_in": body.email_opt_in}):
+    if not update_user(email, {"email_opt_in": body.email_opt_in}):
         raise HTTPException(status_code=500, detail="Could not update email preference")
     return {"email_opt_in": body.email_opt_in}
 
@@ -143,7 +142,7 @@ class ProfileUpdateRequest(BaseModel):
 
 
 @router.put("/me/profile")
-def update_profile(body: ProfileUpdateRequest, username: str = Depends(get_current_username)):
+def update_profile(body: ProfileUpdateRequest, email: str = Depends(get_current_email)):
     cluster = predict_user_cluster(
         age=body.age,
         income_range=body.income_range,
@@ -161,10 +160,10 @@ def update_profile(body: ProfileUpdateRequest, username: str = Depends(get_curre
         "risk_tolerance": body.risk_tolerance,
         "cluster": cluster,
     }
-    if not update_user(username, updates):
+    if not update_user(email, updates):
         raise HTTPException(status_code=500, detail="Could not update profile")
 
-    user = get_user_by_name(username)
+    user = get_user_by_email(email)
     return _serialise(user)
 
 
@@ -173,7 +172,7 @@ class HoldingsRequest(BaseModel):
 
 
 @router.put("/me/holdings")
-def save_holdings(body: HoldingsRequest, username: str = Depends(get_current_username)):
+def save_holdings(body: HoldingsRequest, email: str = Depends(get_current_email)):
     if not body.holdings_text.strip():
         raise HTTPException(status_code=400, detail="Please enter at least one ticker.")
 
@@ -181,19 +180,19 @@ def save_holdings(body: HoldingsRequest, username: str = Depends(get_current_use
     if err:
         raise HTTPException(status_code=400, detail=err)
 
-    if not update_user(username, {"holdings": parsed}):
+    if not update_user(email, {"holdings": parsed}):
         raise HTTPException(status_code=500, detail="Could not save holdings")
 
-    user = get_user_by_name(username)
-    if user and user.get("email_opt_in") and user.get("email"):
-        send_holdings_updated_email(username, user["email"], parsed)
+    user = get_user_by_email(email)
+    if user and user.get("email_opt_in"):
+        send_holdings_updated_email(user.get("name", ""), email, parsed)
 
     return {"holdings": parsed}
 
 
 @router.delete("/me/holdings")
-def clear_holdings(username: str = Depends(get_current_username)):
-    if not update_user(username, {"holdings": []}):
+def clear_holdings(email: str = Depends(get_current_email)):
+    if not update_user(email, {"holdings": []}):
         raise HTTPException(status_code=500, detail="Could not clear holdings")
     return {"holdings": []}
 
@@ -206,20 +205,19 @@ class DeleteAccountRequest(BaseModel):
 def delete_account(
     body: DeleteAccountRequest,
     response: Response,
-    username: str = Depends(get_current_username),
+    email: str = Depends(get_current_email),
 ):
-    user = get_user_by_name(username)
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     if not verify_password(body.password, user.get("password", "")):
         raise HTTPException(status_code=401, detail="Incorrect password")
 
-    if not delete_user(username):
+    if not delete_user(email):
         raise HTTPException(status_code=500, detail="Could not delete account")
 
-    if user.get("email"):
-        send_account_deleted_email(username, user["email"])
+    send_account_deleted_email(user.get("name", ""), email)
 
     response.delete_cookie("aiprs_session")
     return {"ok": True}

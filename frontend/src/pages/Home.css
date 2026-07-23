@@ -511,13 +511,6 @@
   margin: 0 0 24px;
 }
 
-.home-footer {
-  text-align: center;
-  padding: 24px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
 @media (max-width: 900px) {
   .hero-inner {
     grid-template-columns: 1fr;

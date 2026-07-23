@@ -99,7 +99,7 @@ def compute_mpt_allocation(risk_tolerance: int) -> dict | None:
     }
 
 
-def get_collaborative_recs(current_user_name: str):
+def get_collaborative_recs(current_user_email: str):
     """Finds assets preferred by other users in the same cluster.
     Returns (recommendations list, cluster id) or (None, error message).
     """
@@ -107,7 +107,7 @@ def get_collaborative_recs(current_user_name: str):
     if not all_users:
         return None, "No user data available."
 
-    current_user = next((u for u in all_users if u.get("name") == current_user_name), None)
+    current_user = next((u for u in all_users if u.get("email") == current_user_email), None)
     if current_user is None:
         return None, "User profile not found."
 
@@ -118,7 +118,7 @@ def get_collaborative_recs(current_user_name: str):
 
     neighbors = [
         u for u in all_users
-        if u.get("cluster") == user_cluster and u.get("name") != current_user_name
+        if u.get("cluster") == user_cluster and u.get("email") != current_user_email
     ]
 
     if not neighbors:

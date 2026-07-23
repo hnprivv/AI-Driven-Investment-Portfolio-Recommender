@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.auth import get_current_username
-from app.db import get_user_by_name
+from app.auth import get_current_email
+from app.db import get_user_by_email
 from app.portfolio import CLUSTER_ALLOCATIONS, CLUSTER_LABELS
 from app.recommendations import STRATEGY_INFO, compute_mpt_allocation, get_collaborative_recs
 
@@ -9,8 +9,8 @@ router = APIRouter()
 
 
 @router.get("")
-def get_recommendations(username: str = Depends(get_current_username)):
-    user = get_user_by_name(username)
+def get_recommendations(email: str = Depends(get_current_email)):
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -42,7 +42,7 @@ def get_recommendations(username: str = Depends(get_current_username)):
 
     strategy_title, strategy_desc = STRATEGY_INFO.get(risk_profile, STRATEGY_INFO["Moderate"])
 
-    recs, status_or_cluster = get_collaborative_recs(username)
+    recs, status_or_cluster = get_collaborative_recs(email)
     peer_recs = []
     peer_status = "ok"
     if recs:

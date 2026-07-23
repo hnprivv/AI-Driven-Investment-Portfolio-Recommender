@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../api";
+import aiprsLogo from "../assets/aiprs-logo.png";
 
 // One-line addition per future page — Overview, Recommendations, Market,
 // PPO Advisors, News, etc. just get appended here as they're built.
@@ -72,13 +73,27 @@ function UserMenu({ user, onLogout }) {
   );
 }
 
-export default function Navbar({ user, onLogout }) {
+export default function Navbar({ user, onLogout, minimal = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  if (minimal) {
+    return (
+      <header className="navbar">
+        <div className="navbar-inner navbar-inner-minimal">
+          <Link to="/" className="navbar-brand">
+            <img src={aiprsLogo} alt="" width="28" height="28" className="navbar-logo" />
+            AIPRS
+          </Link>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
+          <img src={aiprsLogo} alt="" width="28" height="28" className="navbar-logo" />
           AIPRS
         </Link>
 

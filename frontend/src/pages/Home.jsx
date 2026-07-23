@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import DashboardPreview from "../components/DashboardPreview";
+import Footer from "../components/Footer";
 import "./Home.css";
 
 const ICON_PROPS = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -179,9 +180,7 @@ export default function Home({ user, onLogout }) {
         </>
       )}
 
-      <footer className="home-footer">
-        <p>AIPRS — Final Year Project. For research and educational demonstration only.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

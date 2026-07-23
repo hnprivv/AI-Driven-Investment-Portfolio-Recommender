@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field
 from pymongo.errors import DuplicateKeyError
 
-from app.auth import create_session_token, get_current_username, verify_password
+from app.auth import create_session_token, get_current_email, verify_password
 from app.clustering import predict_user_cluster
-from app.db import get_db, get_user_by_name
+from app.db import get_db, get_user_by_email
 from app.email_service import send_welcome_email
 from app.portfolio import CLUSTER_LABELS
 from app.validation import EMAIL_RE, validate_password
@@ -50,7 +50,7 @@ def login(body: LoginRequest, response: Response):
     if user is None or not verify_password(body.password, user.get("password", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    token = create_session_token(user["name"])
+    token = create_session_token(user["email"])
     response.set_cookie(
         key="aiprs_session",
         value=token,
@@ -111,7 +111,7 @@ def signup(body: SignupRequest, response: Response):
 
     send_welcome_email(name, email, CLUSTER_LABELS.get(cluster, "Moderate"))
 
-    token = create_session_token(name)
+    token = create_session_token(email)
     response.set_cookie(
         key="aiprs_session",
         value=token,
@@ -129,8 +129,8 @@ def logout(response: Response):
 
 
 @router.get("/me", response_model=UserOut)
-def me(username: str = Depends(get_current_username)):
-    user = get_user_by_name(username)
+def me(email: str = Depends(get_current_email)):
+    user = get_user_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return UserOut(

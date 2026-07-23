@@ -17,9 +17,12 @@ def verify_password(password: str, stored_hash: str) -> bool:
         return False
 
 
-def create_session_token(username: str) -> str:
+def create_session_token(email: str) -> str:
+    """The session's subject is the user's email — the only field actually
+    guaranteed unique (enforced both at signup and by a DB unique index).
+    Display names are NOT unique and must never be used as an identity key."""
     payload = {
-        "sub": username,
+        "sub": email,
         "exp": datetime.datetime.now(datetime.timezone.utc)
         + datetime.timedelta(hours=JWT_TTL_HOURS),
     }
@@ -34,18 +37,18 @@ def decode_session_token(token: str) -> str:
         raise HTTPException(status_code=401, detail="Invalid or expired session")
 
 
-def get_current_username(aiprs_session: str | None = Cookie(default=None)) -> str:
+def get_current_email(aiprs_session: str | None = Cookie(default=None)) -> str:
     if aiprs_session is None:
         raise HTTPException(status_code=401, detail="Not authenticated")
     return decode_session_token(aiprs_session)
 
 
-def get_current_username_optional(aiprs_session: str | None = Cookie(default=None)) -> str:
-    """Like get_current_username, but returns "Guest" instead of raising when
+def get_current_email_optional(aiprs_session: str | None = Cookie(default=None)) -> str | None:
+    """Like get_current_email, but returns None instead of raising when
     there's no session — for pages that work for logged-out visitors too."""
     if aiprs_session is None:
-        return "Guest"
+        return None
     try:
         return decode_session_token(aiprs_session)
     except HTTPException:
-        return "Guest"
+        return None
