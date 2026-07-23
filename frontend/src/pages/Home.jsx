@@ -4,44 +4,16 @@ import DashboardPreview from "../components/DashboardPreview";
 import Footer from "../components/Footer";
 import "./Home.css";
 
-const ICON_PROPS = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" };
-
-const TargetIcon = () => (
-  <svg {...ICON_PROPS}>
-    <circle cx="12" cy="12" r="9" />
-    <circle cx="12" cy="12" r="5" />
-    <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
-  </svg>
-);
-
-const CpuIcon = () => (
-  <svg {...ICON_PROPS}>
-    <rect x="6" y="6" width="12" height="12" rx="2" />
-    <rect x="9.5" y="9.5" width="5" height="5" rx="1" />
-    <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
-  </svg>
-);
-
-const EyeIcon = () => (
-  <svg {...ICON_PROPS}>
-    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
-
 const FEATURES = [
   {
-    icon: TargetIcon,
     title: "Personalized Insights",
     desc: "AIPRS evaluates your risk tolerance, goals, and time horizon to craft a portfolio that fits you.",
   },
   {
-    icon: CpuIcon,
     title: "AI-Driven Decisions",
     desc: "Our reinforcement learning engine continuously adapts recommendations based on live market data.",
   },
   {
-    icon: EyeIcon,
     title: "Guaranteed Transparency",
     desc: "Visualize portfolio performance, compare strategies, and track your financial progress in real time.",
   },
@@ -122,7 +94,7 @@ export default function Home({ user, onLogout }) {
           {FEATURES.map((f) => (
             <div key={f.title} className="features-grid-item">
               <div className="feature-card">
-                <div className="feature-icon"><f.icon /></div>
+                <div className="feature-icon" />
                 <h3>{f.title}</h3>
                 <p>{f.desc}</p>
               </div>

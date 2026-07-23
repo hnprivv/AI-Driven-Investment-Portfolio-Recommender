@@ -382,16 +382,7 @@
   margin-bottom: 16px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--secondary-light));
-  color: #1c0a00;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
-}
-
-.feature-icon svg {
-  width: 22px;
-  height: 22px;
 }
 
 .feature-card h3 {
