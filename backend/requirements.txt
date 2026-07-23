@@ -10,7 +10,7 @@ pandas
 scipy
 scikit-learn
 plotly
-kaleido
+kaleido==0.2.1
 fpdf2
 yfinance
 torch

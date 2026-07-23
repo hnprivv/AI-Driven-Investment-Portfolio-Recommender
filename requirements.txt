@@ -13,7 +13,7 @@ pymongo[srv]
 pytz
 yfinance
 fpdf2
-kaleido
+kaleido==0.2.1
 
 # PPO Advisory Agent
 torch

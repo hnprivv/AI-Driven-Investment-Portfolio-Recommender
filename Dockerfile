@@ -24,16 +24,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /repo
 
 # Install Python deps first so this layer is cached across code-only changes.
+# kaleido is pinned to 0.2.1 in requirements.txt — the last version with a
+# self-contained bundled Chromium binary (matching the apt packages above),
+# rather than kaleido >=1.0's separately-downloaded full Chrome, which
+# proved too heavy alongside the PyTorch models already loaded in this
+# container and OOM-crashed the Space.
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu \
     -r backend/requirements.txt
-
-# kaleido >=1.0 no longer bundles a Chromium binary (unlike the 0.2.x series
-# the apt packages above were originally chosen for) — it launches a
-# separately-downloaded Chrome instead. On a dev machine that already has
-# Chrome/Edge installed, kaleido finds it automatically; a fresh container
-# has neither, so this step is required or PDF report generation fails.
-RUN plotly_get_chrome -y
 
 # Only what the backend actually reads at runtime.
 COPY backend/ backend/
