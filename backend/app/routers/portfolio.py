@@ -1,5 +1,9 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
+
+logger = logging.getLogger(__name__)
 
 from app.auth import get_current_email
 from app.clustering import EXPERIENCE_MAP, get_cluster_background
@@ -131,7 +135,11 @@ def get_report_pdf(email: str = Depends(get_current_email)):
 
     overview = _compute_overview_data(user)
     display_name = user.get("name", "")
-    pdf_bytes = generate_pdf_report(username=display_name, user=user, overview=overview)
+    try:
+        pdf_bytes = generate_pdf_report(username=display_name, user=user, overview=overview)
+    except Exception:
+        logger.exception("PDF report generation failed for %s", email)
+        raise HTTPException(status_code=500, detail="Could not generate report")
 
     filename = f"aiprs_report_{display_name.lower().replace(' ', '_') or 'user'}.pdf"
     return Response(

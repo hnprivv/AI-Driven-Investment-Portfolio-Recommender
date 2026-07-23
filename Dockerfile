@@ -34,6 +34,12 @@ COPY assets/ assets/
 
 WORKDIR /repo/backend
 
+# matplotlib builds a font cache on first use, in a directory derived from
+# $HOME by default — Hugging Face Spaces runs Docker containers as a
+# non-root user whose home isn't necessarily writable, so point it at /tmp
+# instead, which always is.
+ENV MPLCONFIGDIR=/tmp/matplotlib
+
 # Hugging Face Spaces (Docker SDK) expects the app on port 7860 by default.
 ENV PORT=7860
 EXPOSE 7860
