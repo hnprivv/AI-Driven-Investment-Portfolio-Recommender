@@ -84,7 +84,7 @@ export default function Settings() {
 
         {/* ── Change Password ───────────────────────────────────────────── */}
         <section className="dash-section">
-          <h2 className="dash-section-title">🔑 Change Password</h2>
+          <h2 className="dash-section-title centered-title">🔑 Change Password</h2>
           <form onSubmit={handlePasswordSubmit} className="chart-card settings-form centered">
             <label className="field-label" htmlFor="current-pw">Current Password</label>
             <input

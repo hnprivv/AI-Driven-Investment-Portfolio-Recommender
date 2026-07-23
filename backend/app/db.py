@@ -21,6 +21,10 @@ def get_user_by_name(name: str) -> dict | None:
     return get_db()["users"].find_one({"name": name})
 
 
+def get_user_by_email(email: str) -> dict | None:
+    return get_db()["users"].find_one({"email": email.strip().lower()})
+
+
 def get_all_users() -> list[dict]:
     return list(get_db()["users"].find({}))
 

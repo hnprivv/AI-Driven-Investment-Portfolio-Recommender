@@ -10,23 +10,8 @@
   text-decoration: underline;
 }
 
-.settings-form {
-  max-width: 480px;
-}
-
 .settings-form.centered {
   margin: 0 auto;
-}
-
-.field-label {
-  display: block;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-
-.centered-title {
-  text-align: center;
 }
 
 .danger-title {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getFullProfile, updateProfile } from "../api";
+import { useOutletContext } from "react-router-dom";
+import { getFullProfile, updateAccount, updateEmailPreference, updateProfile } from "../api";
 import MultiSelect from "../components/MultiSelect";
 import NumberInput from "../components/NumberInput";
 import Select from "../components/Select";
@@ -27,8 +28,16 @@ function fmtDate(iso) {
 }
 
 export default function EditProfile() {
+  const { onUserUpdate } = useOutletContext();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
+
+  const [accountName, setAccountName] = useState("");
+  const [accountEmail, setAccountEmail] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [accountSaving, setAccountSaving] = useState(false);
+  const [accountError, setAccountError] = useState("");
+  const [accountSuccess, setAccountSuccess] = useState("");
 
   const [age, setAge] = useState(25);
   const [incomeRange, setIncomeRange] = useState(INCOME_RANGES[0]);
@@ -42,10 +51,16 @@ export default function EditProfile() {
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
 
+  const [emailOptIn, setEmailOptIn] = useState(false);
+  const [emailPrefSaving, setEmailPrefSaving] = useState(false);
+  const [emailPrefError, setEmailPrefError] = useState("");
+
   useEffect(() => {
     getFullProfile()
       .then((p) => {
         setProfile(p);
+        setAccountName(p.name || "");
+        setAccountEmail(p.email || "");
         setAge(p.age ?? 25);
         setIncomeRange(p.income_range || INCOME_RANGES[0]);
         setHorizon(p.investment_horizon || HORIZONS[0]);
@@ -53,9 +68,25 @@ export default function EditProfile() {
         setGoals(p.goals || GOALS[0]);
         setPreferences(p.preferences || []);
         setRiskTolerance(p.risk_tolerance ?? 5);
+        setEmailOptIn(Boolean(p.email_opt_in));
       })
       .catch((e) => setError(e.message));
   }, []);
+
+  async function handleEmailOptInChange(e) {
+    const next = e.target.checked;
+    setEmailOptIn(next);
+    setEmailPrefError("");
+    setEmailPrefSaving(true);
+    try {
+      await updateEmailPreference(next);
+    } catch (err) {
+      setEmailOptIn(!next);
+      setEmailPrefError(err.message);
+    } finally {
+      setEmailPrefSaving(false);
+    }
+  }
 
   function handleExport() {
     if (!profile) return;
@@ -66,6 +97,42 @@ export default function EditProfile() {
     a.download = `aiprs_profile_${(profile.name || "user").toLowerCase().replace(/\s+/g, "_")}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  const emailChanged = profile && accountEmail.trim().toLowerCase() !== (profile.email || "");
+
+  async function handleAccountSave(e) {
+    e.preventDefault();
+    setAccountError("");
+    setAccountSuccess("");
+
+    if (!accountName.trim() || !accountEmail.trim()) {
+      setAccountError("Name and email cannot be empty.");
+      return;
+    }
+    if (emailChanged && !accountPassword) {
+      setAccountError("Please enter your password to change your email.");
+      return;
+    }
+
+    setAccountSaving(true);
+    try {
+      const updated = await updateAccount({
+        name: accountName.trim(),
+        email: accountEmail.trim(),
+        password: accountPassword,
+      });
+      setProfile(updated);
+      setAccountName(updated.name);
+      setAccountEmail(updated.email);
+      setAccountPassword("");
+      setAccountSuccess("Account details updated successfully.");
+      onUserUpdate?.({ name: updated.name, email: updated.email });
+    } catch (err) {
+      setAccountError(err.message);
+    } finally {
+      setAccountSaving(false);
+    }
   }
 
   async function handleSave(e) {
@@ -144,6 +211,76 @@ export default function EditProfile() {
         <div className="dash-divider"><span>◆</span></div>
 
         <section className="dash-section">
+          <div className="profile-side-grid">
+            <div>
+              <h2 className="dash-section-title">User Profile</h2>
+              <form onSubmit={handleAccountSave} className="chart-card settings-form">
+                <label className="field-label" htmlFor="account-name">Full Name</label>
+                <input
+                  id="account-name"
+                  type="text"
+                  value={accountName}
+                  onChange={(e) => setAccountName(e.target.value)}
+                />
+                <label className="field-label" htmlFor="account-email" style={{ marginTop: 14 }}>Email Address</label>
+                <input
+                  id="account-email"
+                  type="email"
+                  value={accountEmail}
+                  onChange={(e) => setAccountEmail(e.target.value)}
+                />
+                {emailChanged && (
+                  <>
+                    <label className="field-label" htmlFor="account-password" style={{ marginTop: 14 }}>
+                      Password <span className="dash-caption" style={{ margin: 0, display: "inline" }}>(required to change your email)</span>
+                    </label>
+                    <input
+                      id="account-password"
+                      type="password"
+                      value={accountPassword}
+                      onChange={(e) => setAccountPassword(e.target.value)}
+                    />
+                  </>
+                )}
+                {accountError && <div className="error" style={{ marginTop: 10 }}>{accountError}</div>}
+                {accountSuccess && <div className="success" style={{ marginTop: 10 }}>{accountSuccess}</div>}
+                <button type="submit" disabled={accountSaving || !profile} style={{ width: "100%", marginTop: 16 }}>
+                  {accountSaving ? "Saving…" : "Save Account Details"}
+                </button>
+              </form>
+            </div>
+
+            <div>
+              <h2 className="dash-section-title">Export Profile Data</h2>
+              <div className="chart-card settings-form">
+                <p className="dash-caption" style={{ margin: "0 0 14px" }}>
+                  Download a copy of your AIPRS profile as a JSON file. Your password is excluded
+                  from the export.
+                </p>
+                <button onClick={handleExport} disabled={!profile} style={{ width: "100%" }}>
+                  Download My Data
+                </button>
+              </div>
+
+              <div className="chart-card settings-form email-pref-card">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={emailOptIn}
+                    onChange={handleEmailOptInChange}
+                    disabled={!profile || emailPrefSaving}
+                  />
+                  I want to receive emails about account updates.
+                </label>
+                {emailPrefError && <div className="error" style={{ marginTop: 8 }}>{emailPrefError}</div>}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="dash-divider"><span>◆</span></div>
+
+        <section className="dash-section">
           <h2 className="dash-section-title">Financial Profile</h2>
           <form onSubmit={handleSave} className="chart-card edit-profile-form">
             <div className="edit-profile-grid">
@@ -201,21 +338,6 @@ export default function EditProfile() {
           <p className="dash-caption">
             Saving re-runs AIPRS's clustering model, so your Risk Profile badge above may change.
           </p>
-        </section>
-
-        <div className="dash-divider"><span>◆</span></div>
-
-        <section className="dash-section">
-          <h2 className="dash-section-title">📤 Export Profile Data</h2>
-          <div className="chart-card edit-profile-form">
-            <p className="dash-caption" style={{ margin: "0 0 14px" }}>
-              Download a copy of your AIPRS profile as a JSON file. Your password is excluded from
-              the export.
-            </p>
-            <button onClick={handleExport} disabled={!profile} style={{ width: "100%" }}>
-              ⬇️ Download My Data
-            </button>
-          </div>
         </section>
       </div>
     </div>

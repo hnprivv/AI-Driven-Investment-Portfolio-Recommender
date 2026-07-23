@@ -167,6 +167,21 @@
   color: var(--secondary-light);
 }
 
+.field-label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.settings-form {
+  max-width: 480px;
+}
+
+.centered-title {
+  text-align: center;
+}
+
 .risk-badge-row {
   margin-top: 10px;
   display: flex;

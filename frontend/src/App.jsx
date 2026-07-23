@@ -37,7 +37,15 @@ export default function App() {
         path="/signup"
         element={user ? <Navigate to="/dashboard" /> : <Signup onLogin={setUser} />}
       />
-      <Route element={<Layout user={user} onLogout={() => setUser(null)} />}>
+      <Route
+        element={
+          <Layout
+            user={user}
+            onLogout={() => setUser(null)}
+            onUserUpdate={(updates) => setUser((u) => ({ ...u, ...updates }))}
+          />
+        }
+      >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/recommendations" element={<Recommendations />} />
         <Route path="/market" element={<MarketOverview />} />

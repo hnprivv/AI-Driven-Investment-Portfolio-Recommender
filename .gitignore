@@ -7,6 +7,9 @@
 # Frontend dependencies
 frontend/node_modules/
 
+# Frontend build output (regenerate via npm run build)
+frontend/dist/
+
 # Python cache
 __pycache__/
 *.pyc

@@ -39,6 +39,20 @@ export function getFullProfile() {
   return request("/users/me");
 }
 
+export function updateAccount(payload) {
+  return request("/users/me/account", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateEmailPreference(emailOptIn) {
+  return request("/users/me/email-preference", {
+    method: "PUT",
+    body: JSON.stringify({ email_opt_in: emailOptIn }),
+  });
+}
+
 export function updateProfile(payload) {
   return request("/users/me/profile", {
     method: "PUT",

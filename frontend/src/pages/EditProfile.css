@@ -1,7 +1,7 @@
 @import "./shared.css";
 
 .account-card {
-  padding-bottom: 18px;
+  padding: 20px;
 }
 
 .account-grid {
@@ -27,6 +27,28 @@
 
 .edit-profile-form {
   max-width: 720px;
+}
+
+.profile-side-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.profile-side-grid .settings-form {
+  max-width: none;
+}
+
+.email-pref-card {
+  margin-top: 16px;
+  padding: 14px 20px;
+}
+
+.email-pref-card .checkbox-label {
+  margin-top: 0;
+  font-size: 13px;
+  color: var(--text);
 }
 
 .edit-profile-grid {
@@ -65,6 +87,10 @@
   }
 
   .edit-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-side-grid {
     grid-template-columns: 1fr;
   }
 }
