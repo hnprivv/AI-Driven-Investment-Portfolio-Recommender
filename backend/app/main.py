@@ -27,10 +27,15 @@ app = FastAPI(title="AIPRS API")
 _default_origins = ["http://localhost:5173", "http://localhost:4173"]
 _extra_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
 
+# allow_credentials is deliberately False: session auth is a bearer token
+# (see app/auth.py), not a cookie, because Hugging Face Spaces' edge proxy
+# answers CORS preflight (OPTIONS) requests itself and never forwards them
+# to this app — it can't be made to echo Access-Control-Allow-Credentials,
+# which browsers require for cookie-based (credentials: "include") requests.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_default_origins + _extra_origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

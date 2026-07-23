@@ -3,16 +3,32 @@
 // (e.g. https://your-space.hf.space). Falls back to local dev.
 export const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
+// Session auth uses a bearer token (in localStorage), not a cookie.
+// Hugging Face Spaces' edge proxy answers CORS preflight (OPTIONS) requests
+// itself and never forwards them to the app, so it can't be made to echo
+// Access-Control-Allow-Credentials — which breaks cookies (the browser
+// requires that header whenever a request uses credentials: "include").
+// A bearer token isn't sent in credentialed mode, so it isn't affected.
+const TOKEN_KEY = "aiprs_token";
+
+export const getToken = () => localStorage.getItem(TOKEN_KEY);
+const setToken = (token) => localStorage.setItem(TOKEN_KEY, token);
+export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+
 async function request(path, options = {}) {
+  const token = getToken();
   const res = await fetch(`${API_BASE}${path}`, {
-    credentials: "include", // send/receive the httpOnly session cookie
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...options,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.detail || "Request failed");
   }
+  if (data.token) setToken(data.token);
   return data;
 }
 
@@ -30,8 +46,12 @@ export function signup(payload) {
   });
 }
 
-export function logout() {
-  return request("/auth/logout", { method: "POST" });
+export async function logout() {
+  try {
+    await request("/auth/logout", { method: "POST" });
+  } finally {
+    clearToken();
+  }
 }
 
 export function me() {
@@ -82,6 +102,30 @@ export function deleteAccount(password) {
 
 export function getPortfolioOverview() {
   return request("/portfolio/overview");
+}
+
+// The PDF report can't be a plain <a href> anymore — that's a direct
+// browser navigation with no way to attach the Authorization header the
+// bearer-token session needs, so it's fetched here and turned into a
+// blob: URL for the browser to download instead.
+export async function downloadReportPdf() {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/portfolio/report.pdf`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || "Could not generate report");
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "aiprs_portfolio_report.pdf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 export function getClusterPlacement() {

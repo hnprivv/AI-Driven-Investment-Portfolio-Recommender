@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { me } from "./api";
+import { clearToken, me } from "./api";
 import Layout from "./components/Layout";
 import ScrollToTop from "./components/ScrollToTop";
 import Home from "./pages/Home";
@@ -29,13 +29,18 @@ export default function App() {
 
   if (loading) return null;
 
+  const handleLogout = () => {
+    clearToken();
+    setUser(null);
+  };
+
   return (
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Home user={user} onLogout={() => setUser(null)} />} />
-        <Route path="/privacy" element={<PrivacyPolicy user={user} onLogout={() => setUser(null)} />} />
-        <Route path="/terms" element={<TermsConditions user={user} onLogout={() => setUser(null)} />} />
+        <Route path="/" element={<Home user={user} onLogout={handleLogout} />} />
+        <Route path="/privacy" element={<PrivacyPolicy user={user} onLogout={handleLogout} />} />
+        <Route path="/terms" element={<TermsConditions user={user} onLogout={handleLogout} />} />
         <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" /> : <Login onLogin={setUser} />}
@@ -48,7 +53,7 @@ export default function App() {
           element={
             <Layout
               user={user}
-              onLogout={() => setUser(null)}
+              onLogout={handleLogout}
               onUserUpdate={(updates) => setUser((u) => ({ ...u, ...updates }))}
             />
           }

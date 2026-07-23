@@ -1,10 +1,10 @@
 from typing import List
 
 import bcrypt
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from app.auth import clear_session_cookie, get_current_email, set_session_cookie, verify_password
+from app.auth import create_session_token, get_current_email, verify_password
 from app.clustering import predict_user_cluster
 from app.db import delete_user, get_user_by_email, update_user
 from app.email_service import (
@@ -70,7 +70,6 @@ class AccountUpdateRequest(BaseModel):
 @router.put("/me/account")
 def update_account(
     body: AccountUpdateRequest,
-    response: Response,
     email: str = Depends(get_current_email),
 ):
     user = get_user_by_email(email)
@@ -102,13 +101,14 @@ def update_account(
             extra=f"It was changed to {new_email}.",
         )
 
-    # The session's identity is the email — a change invalidates the
-    # current cookie's subject, so reissue it against the new email.
-    if email_changed:
-        set_session_cookie(response, new_email)
-
     updated = get_user_by_email(new_email)
-    return _serialise(updated)
+    out = _serialise(updated)
+    # The session's identity is the email — a change invalidates the
+    # current token's subject, so hand back a fresh one for the frontend
+    # to store in place of the old one.
+    if email_changed:
+        out["token"] = create_session_token(new_email)
+    return out
 
 
 class EmailPreferenceRequest(BaseModel):
@@ -197,7 +197,6 @@ class DeleteAccountRequest(BaseModel):
 @router.delete("/me")
 def delete_account(
     body: DeleteAccountRequest,
-    response: Response,
     email: str = Depends(get_current_email),
 ):
     user = get_user_by_email(email)
@@ -212,5 +211,4 @@ def delete_account(
 
     send_account_deleted_email(user.get("name", ""), email)
 
-    clear_session_cookie(response)
     return {"ok": True}

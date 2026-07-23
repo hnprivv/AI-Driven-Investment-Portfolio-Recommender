@@ -15,12 +15,15 @@
   text-align: center;
   margin-top: 6px;
   padding: 8px 14px;
+  border: none;
   border-radius: 8px;
   background: linear-gradient(90deg, var(--primary), var(--secondary));
   color: white;
+  font-family: inherit;
   font-weight: 600;
   font-size: 13px;
   text-decoration: none;
+  cursor: pointer;
   box-shadow: 0 4px 18px rgba(217, 119, 6, 0.3);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }

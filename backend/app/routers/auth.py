@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
 
 import bcrypt
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from pymongo.errors import DuplicateKeyError
 
-from app.auth import clear_session_cookie, get_current_email, set_session_cookie, verify_password
+from app.auth import create_session_token, get_current_email, verify_password
 from app.clustering import predict_user_cluster
 from app.db import get_db, get_user_by_email
 from app.email_service import send_welcome_email
@@ -45,17 +45,16 @@ def _get_user_by_email(email: str) -> dict | None:
 
 
 @router.post("/login")
-def login(body: LoginRequest, response: Response):
+def login(body: LoginRequest):
     user = _get_user_by_email(body.email)
     if user is None or not verify_password(body.password, user.get("password", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    set_session_cookie(response, user["email"])
-    return {"name": user["name"]}
+    return {"name": user["name"], "token": create_session_token(user["email"])}
 
 
 @router.post("/signup")
-def signup(body: SignupRequest, response: Response):
+def signup(body: SignupRequest):
     name = body.name.strip()
     email = body.email.strip().lower()
 
@@ -104,13 +103,14 @@ def signup(body: SignupRequest, response: Response):
 
     send_welcome_email(name, email, CLUSTER_LABELS.get(cluster, "Moderate"))
 
-    set_session_cookie(response, email)
-    return {"name": name, "cluster": cluster}
+    return {"name": name, "cluster": cluster, "token": create_session_token(email)}
 
 
 @router.post("/logout")
-def logout(response: Response):
-    clear_session_cookie(response)
+def logout():
+    # Nothing to do server-side — the frontend just discards its stored
+    # token. Kept as a route so the frontend's logout() call has something
+    # to hit without a client-side special case.
     return {"ok": True}
 
 

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import Plot from "react-plotly.js";
 import {
-  API_BASE,
   clearHoldings,
+  downloadReportPdf,
   getClusterPlacement,
   getPortfolioOverview,
   saveHoldings,
@@ -175,14 +175,13 @@ export default function Dashboard() {
           </div>
           <div className="metric-card metric-card-report">
             <span className="metric-label">Portfolio Report</span>
-            <a
+            <button
+              type="button"
               className="pdf-download-btn"
-              href={`${API_BASE}/portfolio/report.pdf`}
-              target="_blank"
-              rel="noreferrer"
+              onClick={() => downloadReportPdf().catch((err) => alert(err.message))}
             >
               ⬇ Download PDF
-            </a>
+            </button>
           </div>
         </div>
         <p className="dash-caption">
