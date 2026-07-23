@@ -8,6 +8,7 @@ import datetime
 import logging
 import os
 import smtplib
+import socket
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -28,6 +29,18 @@ LOGO_CID = "aiprs_logo"
 APP_URL = os.getenv("APP_URL", "http://localhost:5173")
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+
+
+class _IPv4SMTP(smtplib.SMTP):
+    """smtplib.SMTP, but forced onto IPv4. smtp.gmail.com resolves to both
+    IPv4 and IPv6 — some hosts (e.g. Hugging Face Spaces) have no outbound
+    IPv6 route, and Python's default happily picks the unreachable IPv6
+    address first, failing with "Network is unreachable" instead of falling
+    back to IPv4."""
+
+    def _get_socket(self, host, port, timeout):
+        addr_info = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
+        return socket.create_connection(addr_info[0][4], timeout)
 
 
 def _send(to_email: str, subject: str, template_name: str, context: dict) -> bool:
@@ -62,7 +75,7 @@ def _send(to_email: str, subject: str, template_name: str, context: dict) -> boo
             logger.exception("Failed to attach logo image")
 
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+        with _IPv4SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
             server.starttls()
             server.login(smtp_user, smtp_password)
             server.sendmail(smtp_user, [to_email], msg.as_string())
