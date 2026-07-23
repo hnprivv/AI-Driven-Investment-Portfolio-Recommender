@@ -1,9 +1,15 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { me, signup } from "../api";
 import Select from "../components/Select";
 import NumberInput from "../components/NumberInput";
 import Footer from "../components/Footer";
+
+// Module-scoped, not component state, so it survives Signup unmounting when
+// the user clicks through to Privacy/Terms and back — but still resets on
+// a full page refresh (module state doesn't survive that) or navigating
+// anywhere else, since those cases clear it below instead of restoring it.
+let draft = null;
 
 const INCOME_RANGES = ["< 25,000", "25,000 - 50,000", "50,000 - 100,000", "100,000+"];
 const HORIZONS = ["1 Year", "3-5 Years", "5-10 Years", "10+ Years"];
@@ -26,21 +32,35 @@ function validatePassword(pw) {
 }
 
 export default function Signup({ onLogin }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [age, setAge] = useState(25);
-  const [incomeRange, setIncomeRange] = useState(INCOME_RANGES[0]);
-  const [horizon, setHorizon] = useState(HORIZONS[0]);
-  const [experience, setExperience] = useState(EXPERIENCES[0]);
-  const [goals, setGoals] = useState(GOALS[0]);
-  const [preferences, setPreferences] = useState([]);
-  const [riskTolerance, setRiskTolerance] = useState(5);
-  const [agreed, setAgreed] = useState(false);
+  const location = useLocation();
+  // Only restore the draft when arriving back from Privacy/Terms — any
+  // other way of landing on Signup (fresh nav, login page, browser back to
+  // home, etc.) should start blank, so discard a stale draft in that case.
+  const restore = location.state?.from === "legal" ? draft : null;
+  if (!restore) draft = null;
+
+  const [name, setName] = useState(restore?.name ?? "");
+  const [email, setEmail] = useState(restore?.email ?? "");
+  const [password, setPassword] = useState(restore?.password ?? "");
+  const [confirmPassword, setConfirmPassword] = useState(restore?.confirmPassword ?? "");
+  const [age, setAge] = useState(restore?.age ?? 25);
+  const [incomeRange, setIncomeRange] = useState(restore?.incomeRange ?? INCOME_RANGES[0]);
+  const [horizon, setHorizon] = useState(restore?.horizon ?? HORIZONS[0]);
+  const [experience, setExperience] = useState(restore?.experience ?? EXPERIENCES[0]);
+  const [goals, setGoals] = useState(restore?.goals ?? GOALS[0]);
+  const [preferences, setPreferences] = useState(restore?.preferences ?? []);
+  const [riskTolerance, setRiskTolerance] = useState(restore?.riskTolerance ?? 5);
+  const [agreed, setAgreed] = useState(restore?.agreed ?? false);
 
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    draft = {
+      name, email, password, confirmPassword, age, incomeRange, horizon,
+      experience, goals, preferences, riskTolerance, agreed,
+    };
+  });
 
   function togglePreference(pref) {
     setPreferences((prev) =>
@@ -89,6 +109,7 @@ export default function Signup({ onLogin }) {
         risk_tolerance: Number(riskTolerance),
       });
       const fullProfile = await me();
+      draft = null;
       onLogin(fullProfile);
     } catch (err) {
       setError(err.message);

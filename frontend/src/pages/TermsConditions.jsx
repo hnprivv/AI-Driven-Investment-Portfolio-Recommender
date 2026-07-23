@@ -17,7 +17,7 @@ export default function TermsConditions({ user, onLogout }) {
           <div className="legal-title-row">
             <h1>Terms & Conditions</h1>
             {fromSignup && (
-              <Link to="/signup" className="legal-back-link">← Back to Signup</Link>
+              <Link to="/signup" state={{ from: "legal" }} className="legal-back-link">← Back to Signup</Link>
             )}
           </div>
           <p className="subtitle">Last updated: {LAST_UPDATED}</p>
