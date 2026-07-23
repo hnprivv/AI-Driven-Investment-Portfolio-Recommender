@@ -15,6 +15,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Recommendations from "./pages/Recommendations";
 import Settings from "./pages/Settings";
 import TermsConditions from "./pages/TermsConditions";
+import Updates from "./pages/Updates";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -39,6 +40,7 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home user={user} onLogout={handleLogout} />} />
+        <Route path="/updates" element={<Updates user={user} onLogout={handleLogout} />} />
         <Route path="/privacy" element={<PrivacyPolicy user={user} onLogout={handleLogout} />} />
         <Route path="/terms" element={<TermsConditions user={user} onLogout={handleLogout} />} />
         <Route

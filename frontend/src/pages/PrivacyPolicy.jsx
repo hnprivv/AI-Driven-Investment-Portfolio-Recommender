@@ -77,11 +77,11 @@ export default function PrivacyPolicy({ user, onLogout }) {
           </section>
 
           <section className="legal-section">
-            <h2>4. Cookies & Sessions</h2>
+            <h2>4. Sessions</h2>
             <p>
-              AIPRS uses a single secure, HTTP-only session cookie to keep you signed in. It
-              contains no tracking or advertising identifiers, and we don't use third-party
-              analytics or ad-tracking cookies.
+              AIPRS keeps you signed in using a session token stored in your browser, sent with
+              each request to identify your account. It contains no tracking or advertising
+              identifiers, and we don't use third-party analytics or ad-tracking cookies.
             </p>
           </section>
 
