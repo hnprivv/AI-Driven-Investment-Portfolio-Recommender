@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../api";
 import aiprsLogo from "../assets/aiprs-logo.png";
+import { LATEST_UPDATE_ID } from "../updatesLog";
 
 // One-line addition per future page — Overview, Recommendations, Market,
 // PPO Advisors, News, etc. just get appended here as they're built.
@@ -10,8 +11,11 @@ const NAV_LINKS = [
   { label: "AI Recommendations", path: "/recommendations" },
   { label: "Market", path: "/market" },
   { label: "News", path: "/news" },
+  { label: "Update Log", path: "/updates" },
   { label: "Feedback", path: "/feedback" },
 ];
+
+const UPDATES_SEEN_KEY = "aiprs_updates_seen";
 
 function initials(name) {
   if (!name) return "?";
@@ -75,6 +79,17 @@ function UserMenu({ user, onLogout }) {
 
 export default function Navbar({ user, onLogout, minimal = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const [hasNewUpdate, setHasNewUpdate] = useState(
+    () => localStorage.getItem(UPDATES_SEEN_KEY) !== LATEST_UPDATE_ID
+  );
+
+  useEffect(() => {
+    if (location.pathname === "/updates") {
+      localStorage.setItem(UPDATES_SEEN_KEY, LATEST_UPDATE_ID);
+      setHasNewUpdate(false);
+    }
+  }, [location.pathname]);
 
   if (minimal) {
     return (
@@ -110,6 +125,9 @@ export default function Navbar({ user, onLogout, minimal = false }) {
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
+                  {link.path === "/updates" && hasNewUpdate && (
+                    <span className="navbar-link-dot" aria-label="New update" />
+                  )}
                 </NavLink>
               ))}
             </nav>
