@@ -1,3 +1,19 @@
+---
+title: AIPRS Backend
+emoji: 📈
+colorFrom: yellow
+colorTo: orange
+sdk: docker
+app_port: 7860
+---
+
+<!--
+  The block above is Hugging Face Spaces' required config header — it's read
+  from README.md at the repo root when this repo is pushed as a Space's git
+  remote, and tells HF to build the Dockerfile at the repo root and expose
+  port 7860. Harmless to any other viewer (GitHub just renders it as-is).
+-->
+
 # AIPRS – AI-Powered Portfolio Recommendation System
 
 **AIPRS** is an intelligent investment companion built as a Final Year Project. It profiles investors using machine learning, recommends optimised portfolio allocations, delivers live and delayed market data across two exchanges, analyses financial news sentiment, and provides reinforcement learning-based trading signals — all through a Streamlit dashboard.

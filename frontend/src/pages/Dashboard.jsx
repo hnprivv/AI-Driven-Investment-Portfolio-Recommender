@@ -387,7 +387,7 @@ export default function Dashboard() {
 
       {/* ── AI Cluster Placement ──────────────────────────────────────── */}
       <section className="dash-section">
-        <h2 className="dash-section-title">🧩 Your AI Cluster Placement</h2>
+        <h2 className="dash-section-title">Your AI Cluster Placement</h2>
         <p className="dash-caption" style={{ margin: "0 0 16px" }}>
           Where you sit among all investor profiles in the K-Means model's decision space.
         </p>

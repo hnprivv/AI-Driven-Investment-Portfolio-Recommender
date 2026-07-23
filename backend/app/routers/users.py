@@ -4,7 +4,7 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from app.auth import create_session_token, get_current_email, verify_password
+from app.auth import clear_session_cookie, get_current_email, set_session_cookie, verify_password
 from app.clustering import predict_user_cluster
 from app.db import delete_user, get_user_by_email, update_user
 from app.email_service import (
@@ -105,14 +105,7 @@ def update_account(
     # The session's identity is the email — a change invalidates the
     # current cookie's subject, so reissue it against the new email.
     if email_changed:
-        token = create_session_token(new_email)
-        response.set_cookie(
-            key="aiprs_session",
-            value=token,
-            httponly=True,
-            samesite="lax",
-            max_age=24 * 3600,
-        )
+        set_session_cookie(response, new_email)
 
     updated = get_user_by_email(new_email)
     return _serialise(updated)
@@ -219,5 +212,5 @@ def delete_account(
 
     send_account_deleted_email(user.get("name", ""), email)
 
-    response.delete_cookie("aiprs_session")
+    clear_session_cookie(response)
     return {"ok": True}

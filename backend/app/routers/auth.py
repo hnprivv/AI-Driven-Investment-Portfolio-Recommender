@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field
 from pymongo.errors import DuplicateKeyError
 
-from app.auth import create_session_token, get_current_email, verify_password
+from app.auth import clear_session_cookie, get_current_email, set_session_cookie, verify_password
 from app.clustering import predict_user_cluster
 from app.db import get_db, get_user_by_email
 from app.email_service import send_welcome_email
@@ -50,14 +50,7 @@ def login(body: LoginRequest, response: Response):
     if user is None or not verify_password(body.password, user.get("password", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    token = create_session_token(user["email"])
-    response.set_cookie(
-        key="aiprs_session",
-        value=token,
-        httponly=True,
-        samesite="lax",
-        max_age=24 * 3600,
-    )
+    set_session_cookie(response, user["email"])
     return {"name": user["name"]}
 
 
@@ -111,20 +104,13 @@ def signup(body: SignupRequest, response: Response):
 
     send_welcome_email(name, email, CLUSTER_LABELS.get(cluster, "Moderate"))
 
-    token = create_session_token(email)
-    response.set_cookie(
-        key="aiprs_session",
-        value=token,
-        httponly=True,
-        samesite="lax",
-        max_age=24 * 3600,
-    )
+    set_session_cookie(response, email)
     return {"name": name, "cluster": cluster}
 
 
 @router.post("/logout")
 def logout(response: Response):
-    response.delete_cookie("aiprs_session")
+    clear_session_cookie(response)
     return {"ok": True}
 
 

@@ -1,4 +1,7 @@
-export const API_BASE = "http://localhost:8000";
+// VITE_API_BASE is set as a build-time env var on the hosting platform
+// (e.g. Vercel project settings) pointing at the deployed backend
+// (e.g. https://your-space.hf.space). Falls back to local dev.
+export const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
 async function request(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {

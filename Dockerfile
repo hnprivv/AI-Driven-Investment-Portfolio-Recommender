@@ -1,0 +1,37 @@
+# Backend image for Hugging Face Spaces (Docker SDK).
+# Builds the FastAPI app in backend/, which also needs modules/ (ML models:
+# K-Means clustering, PPO agents) and assets/ (email logo) from the repo
+# root — see ROOT-relative path logic in backend/app/db.py, clustering.py,
+# and email_service.py.
+
+FROM python:3.13-slim
+
+# System libraries required by kaleido (headless Chromium, used to render
+# Plotly charts into the PDF report) and by common ML wheels.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget ca-certificates \
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libgbm1 \
+    libasound2 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
+    libxkbcommon0 libpango-1.0-0 libpangocairo-1.0-0 fonts-liberation \
+    libx11-xcb1 libxext6 libxi6 libxtst6 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /repo
+
+# Install Python deps first so this layer is cached across code-only changes.
+COPY backend/requirements.txt backend/requirements.txt
+RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu \
+    -r backend/requirements.txt
+
+# Only what the backend actually reads at runtime.
+COPY backend/ backend/
+COPY modules/ modules/
+COPY assets/ assets/
+
+WORKDIR /repo/backend
+
+# Hugging Face Spaces (Docker SDK) expects the app on port 7860 by default.
+ENV PORT=7860
+EXPOSE 7860
+
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]

@@ -50,7 +50,7 @@ const FEATURES = [
 const STEPS = [
   {
     title: "Create Your Profile",
-    desc: "Sign up and complete your investor profile — age, goals, risk tolerance, and horizon. This is the foundation for everything the AI does.",
+    desc: "Sign up and complete your investor profile, age, goals, risk tolerance, and horizon. This is the foundation for everything the AI does.",
   },
   {
     title: "Get Your AI Risk Classification",
@@ -62,7 +62,7 @@ const STEPS = [
   },
   {
     title: "Monitor the Markets",
-    desc: "Track US and PSX market data in real time, with live price feeds and sector performance.",
+    desc: "Track US and PSX market data, with price feeds and sector performance.",
   },
   {
     title: "Analyse News Sentiment",
@@ -70,7 +70,7 @@ const STEPS = [
   },
   {
     title: "Run the PPO Advisors",
-    desc: "Get BUY / HOLD / SELL signals from two dedicated RL models — one for US equities, one for PSX — each with a confidence score.",
+    desc: "Get BUY / HOLD / SELL signals from two dedicated RL models, one for US equities, one for PSX; each with a confidence score.",
   },
 ];
 
@@ -82,13 +82,13 @@ export default function Home({ user, onLogout }) {
       <section className="hero">
         <div className="hero-inner">
           <div className="hero-copy">
-            <div className="hero-eyebrow">AI-Powered Portfolio Recommender</div>
+            <div className="hero-eyebrow">AI-Powered Portfolio Recommender - In Progress</div>
             <h1>
               Investing, guided by <span className="gradient-text">artificial intelligence</span>.
             </h1>
             <p className="hero-sub">
               AIPRS analyzes market trends, assesses your unique risk profile, and constructs
-              optimized portfolios that evolve with market behavior — combining reinforcement
+              optimized portfolios that evolve with market behavior, combining reinforcement
               learning with Modern Portfolio Theory.
             </p>
             {!user && (
@@ -160,7 +160,7 @@ export default function Home({ user, onLogout }) {
           </p>
           <p>
             Your financial decisions should evolve as the markets do. Let AIPRS handle the
-            complexity, so you can focus on what matters — your goals.
+            complexity, so you can focus on what matters, your goals.
           </p>
         </blockquote>
       </section>

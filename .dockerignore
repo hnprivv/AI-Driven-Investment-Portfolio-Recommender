@@ -1,0 +1,29 @@
+# Never ship secrets — Spaces injects real values via its secret manager.
+.env
+.git/
+.claude/
+
+# Frontend isn't part of this image (deployed separately to Vercel).
+frontend/node_modules/
+frontend/dist/
+frontend/
+
+# Local dev / build artefacts not needed at runtime.
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+data/
+paper_figures/
+paper_figures.zip
+*.csv
+
+# Streamlit-app-only files (the FastAPI backend doesn't use these).
+pages/
+styles.css
+Home.py
+train_model.py
+train_ppo.py
+train_ppo_psx.py
