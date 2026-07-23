@@ -7,6 +7,11 @@ from pydantic import BaseModel, Field
 from app.auth import create_session_token, get_current_username, verify_password
 from app.clustering import predict_user_cluster
 from app.db import delete_user, get_user_by_email, get_user_by_name, update_user
+from app.email_service import (
+    send_account_deleted_email,
+    send_credentials_updated_email,
+    send_holdings_updated_email,
+)
 from app.portfolio import parse_holdings_input
 from app.validation import EMAIL_RE
 
@@ -49,6 +54,10 @@ def change_password(
     new_hash = bcrypt.hashpw(body.new_password.encode("utf-8"), bcrypt.gensalt()).decode()
     if not update_user(username, {"password": new_hash}):
         raise HTTPException(status_code=500, detail="Could not update password")
+
+    if user.get("email_opt_in") and user.get("email"):
+        send_credentials_updated_email(username, user["email"], "password")
+
     return {"ok": True}
 
 
@@ -87,6 +96,12 @@ def update_account(
 
     if not update_user(username, {"name": new_name, "email": new_email}):
         raise HTTPException(status_code=500, detail="Could not update account")
+
+    if email_changed and user.get("email_opt_in") and user.get("email"):
+        send_credentials_updated_email(
+            username, user["email"], "email",
+            extra=f"It was changed to {new_email}.",
+        )
 
     # "name" doubles as the session identity, so a rename invalidates the
     # current cookie's subject — reissue it against the new name.
@@ -168,6 +183,11 @@ def save_holdings(body: HoldingsRequest, username: str = Depends(get_current_use
 
     if not update_user(username, {"holdings": parsed}):
         raise HTTPException(status_code=500, detail="Could not save holdings")
+
+    user = get_user_by_name(username)
+    if user and user.get("email_opt_in") and user.get("email"):
+        send_holdings_updated_email(username, user["email"], parsed)
+
     return {"holdings": parsed}
 
 
@@ -197,6 +217,9 @@ def delete_account(
 
     if not delete_user(username):
         raise HTTPException(status_code=500, detail="Could not delete account")
+
+    if user.get("email"):
+        send_account_deleted_email(username, user["email"])
 
     response.delete_cookie("aiprs_session")
     return {"ok": True}

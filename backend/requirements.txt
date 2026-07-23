@@ -16,3 +16,4 @@ yfinance
 torch
 transformers
 feedparser
+jinja2

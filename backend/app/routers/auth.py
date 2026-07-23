@@ -8,6 +8,8 @@ from pymongo.errors import DuplicateKeyError
 from app.auth import create_session_token, get_current_username, verify_password
 from app.clustering import predict_user_cluster
 from app.db import get_db, get_user_by_name
+from app.email_service import send_welcome_email
+from app.portfolio import CLUSTER_LABELS
 from app.validation import EMAIL_RE, validate_password
 
 router = APIRouter()
@@ -106,6 +108,8 @@ def signup(body: SignupRequest, response: Response):
         raise HTTPException(
             status_code=409, detail="An account with this email already exists."
         )
+
+    send_welcome_email(name, email, CLUSTER_LABELS.get(cluster, "Moderate"))
 
     token = create_session_token(name)
     response.set_cookie(
