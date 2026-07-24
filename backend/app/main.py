@@ -17,7 +17,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file_
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, feedback, market, news, portfolio, recommendations, users
+from app.routers import auth, feedback, market, news, portfolio, ppo, recommendations, users
 
 app = FastAPI(title="AIPRS API")
 
@@ -51,6 +51,7 @@ app.include_router(recommendations.router, prefix="/recommendations", tags=["rec
 app.include_router(market.router, prefix="/market", tags=["market"])
 app.include_router(news.router, prefix="/news", tags=["news"])
 app.include_router(feedback.router, prefix="", tags=["feedback"])
+app.include_router(ppo.router, prefix="/ppo", tags=["ppo"])
 
 
 @app.get("/health")

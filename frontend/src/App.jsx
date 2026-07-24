@@ -12,6 +12,7 @@ import EditProfile from "./pages/EditProfile";
 import Feedback from "./pages/Feedback";
 import MarketOverview from "./pages/MarketOverview";
 import NewsSentiment from "./pages/NewsSentiment";
+import PpoAdvisor from "./pages/PpoAdvisor";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Recommendations from "./pages/Recommendations";
 import Settings from "./pages/Settings";
@@ -77,6 +78,7 @@ export default function App() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/agents" element={<PpoAdvisor />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/profile" element={<EditProfile />} />
           <Route path="/settings" element={<Settings />} />

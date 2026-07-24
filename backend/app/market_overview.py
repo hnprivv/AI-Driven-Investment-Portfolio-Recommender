@@ -146,6 +146,55 @@ def fetch_bars_alpaca(symbol: str, timeframe: str = "1Min", limit: int = 120) ->
         return None
 
 
+def fetch_daily_bars_alpaca(symbol: str, days: int = 400) -> pd.DataFrame | None:
+    """Like fetch_bars_alpaca, but with a `days`-long lookback instead of the
+    hardcoded 14 days that function uses (fine for its 120-bar intraday
+    charts, useless for the PPO agent's ~400-day daily feature history)."""
+    cache_key = f"daily_bars:{symbol}:{days}"
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    headers = _alpaca_headers()
+    if headers is None:
+        return None
+
+    end = datetime.datetime.utcnow()
+    start = end - datetime.timedelta(days=days)
+    params = {
+        "timeframe": "1Day",
+        "start": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "end": end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "limit": 10_000,
+        "feed": "iex",
+        "sort": "desc",
+    }
+    try:
+        resp = requests.get(f"{ALPACA_DATA_URL}/stocks/{symbol}/bars", headers=headers, params=params, timeout=10)
+        resp.raise_for_status()
+        bars = resp.json().get("bars", [])
+        if not bars:
+            return None
+        df = pd.DataFrame(bars)
+        df.rename(columns={"t": "timestamp", "o": "open", "h": "high", "l": "low", "c": "close", "v": "volume"}, inplace=True)
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df = df.iloc[::-1].reset_index(drop=True)
+        result = df[["timestamp", "open", "high", "low", "close", "volume"]]
+        _cache_set(cache_key, result)
+        return result
+    except Exception:
+        return None
+
+
+def get_daily_bars(symbol: str, days: int = 400) -> tuple[pd.DataFrame, bool]:
+    df = fetch_daily_bars_alpaca(symbol, days)
+    if df is not None and not df.empty:
+        return df, True
+    seed = abs(hash(symbol)) % 10000
+    base = SYNTHETIC_BASES.get(symbol, 100.0)
+    return make_synthetic_bars(base, n=min(days, 400), seed=seed), False
+
+
 def fetch_latest_price(symbol: str, is_crypto: bool = False) -> float | None:
     cache_key = f"latest:{symbol}:{is_crypto}"
     cached = _cache_get(cache_key)

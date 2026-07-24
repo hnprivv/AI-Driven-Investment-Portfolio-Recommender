@@ -1,0 +1,311 @@
+@import "./shared.css";
+@import "./MarketOverview.css";
+
+.ppo-panel {
+  margin-top: 20px;
+}
+
+.ppo-search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.ppo-search input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.ppo-search input:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+
+.ppo-search button {
+  padding: 10px 22px;
+  white-space: nowrap;
+}
+
+/* ── Sentiment summary bar (watchlist) ─────────────────────────────────── */
+
+.ppo-sentiment {
+  margin-bottom: 18px;
+}
+
+.ppo-sentiment-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 6px 0 6px;
+}
+
+.ppo-sentiment-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+}
+
+/* ── Watchlist card grid ───────────────────────────────────────────────── */
+
+.ppo-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.ppo-card {
+  text-align: left;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--action-color) 10%, transparent), rgba(255, 255, 255, 0.02));
+  border: 1px solid color-mix(in srgb, var(--action-color) 30%, transparent);
+  border-left: 4px solid var(--action-color);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ppo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--action-color) 20%, transparent);
+}
+
+.ppo-card.active {
+  box-shadow: 0 0 0 2px var(--action-color);
+}
+
+.ppo-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.ppo-card-symbol {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.ppo-card-action {
+  background: color-mix(in srgb, var(--action-color) 18%, transparent);
+  color: var(--action-color);
+  border: 1px solid color-mix(in srgb, var(--action-color) 45%, transparent);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ppo-card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ppo-card-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.ppo-card-chg {
+  font-size: 11px;
+}
+
+.ppo-card-chg.up {
+  color: #22c55e;
+}
+
+.ppo-card-chg.down {
+  color: #ef4444;
+}
+
+.ppo-card-conf {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.ppo-prob-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+/* ── Detail view ───────────────────────────────────────────────────────── */
+
+.ppo-detail {
+  margin-bottom: 28px;
+}
+
+.ppo-detail-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.ppo-detail-close {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--card-border);
+  color: var(--muted);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ppo-detail-close:hover {
+  color: var(--text);
+  border-color: var(--secondary);
+}
+
+.ppo-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  background: color-mix(in srgb, var(--action-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--action-color) 30%, transparent);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.ppo-banner-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ppo-banner-action {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--action-color);
+  line-height: 1.1;
+}
+
+.ppo-banner-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+.ppo-banner-price .up {
+  color: #22c55e;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+.ppo-banner-price .down {
+  color: #ef4444;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+.ppo-banner-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+  max-width: 320px;
+}
+
+.ppo-banner-confidence {
+  text-align: right;
+  min-width: 140px;
+}
+
+.ppo-banner-confidence-value {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--action-color);
+}
+
+.ppo-confidence-meter {
+  width: 140px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.ppo-confidence-meter div {
+  height: 100%;
+  background: var(--action-color);
+}
+
+.ppo-prob-section {
+  margin-bottom: 20px;
+}
+
+.ppo-prob-bar.large {
+  display: flex;
+  height: 26px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.ppo-prob-bar.large div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0b0b0f;
+}
+
+.ppo-indicator-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ppo-hitrate-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 32px 0 20px;
+}
+
+.ppo-hitrate-grid .metric-card {
+  flex: 0 1 170px;
+}
+
+.ppo-explainer {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+  border-top: 1px solid var(--card-border);
+  padding-top: 14px;
+}
+
+.ppo-explainer summary {
+  cursor: pointer;
+  color: var(--secondary);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ppo-explainer p {
+  line-height: 1.6;
+}
+
+.ppo-explainer code {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 1px 5px;
+}

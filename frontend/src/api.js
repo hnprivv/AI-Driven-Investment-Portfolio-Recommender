@@ -177,6 +177,22 @@ export function getPsxCompanyNews(query, limit) {
   return request(`/news/psx/company?query=${encodeURIComponent(query)}&limit=${limit}`);
 }
 
+export function getUsPpoBatch() {
+  return request("/ppo/us/batch");
+}
+
+export function getUsPpoDetail(symbol) {
+  return request(`/ppo/us/detail?symbol=${encodeURIComponent(symbol)}`);
+}
+
+export function getPsxPpoBatch() {
+  return request("/ppo/psx/batch");
+}
+
+export function getPsxPpoDetail(symbol) {
+  return request(`/ppo/psx/detail?symbol=${encodeURIComponent(symbol)}`);
+}
+
 export function submitFeedback(payload) {
   return request("/feedback", { method: "POST", body: JSON.stringify(payload) });
 }

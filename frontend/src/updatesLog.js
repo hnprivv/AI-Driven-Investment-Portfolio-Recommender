@@ -2,6 +2,12 @@
 // "new" dot until the user has visited /updates since the latest entry).
 export const UPDATES_LOG = [
   {
+    id: "ppo-advisors",
+    date: "July 24, 2026",
+    title: "Agents — PPO Advisors",
+    desc: "Reinforcement-learning BUY / HOLD / SELL trading signals, ported from the legacy Streamlit app into a redesigned Agents page — one page, two tabs (US and PSX), with a watchlist, confidence meters, market indicators, signal history chart, and hit-rate stats, all adapted to your risk profile.",
+  },
+  {
     id: "live-in-production",
     date: "July 23, 2026",
     title: "Live in production",

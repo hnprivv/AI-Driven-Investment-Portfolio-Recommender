@@ -11,6 +11,7 @@ import { LATEST_UPDATE_ID } from "../updatesLog";
 const NAV_LINKS = [
   { label: "Dashboard", path: "/dashboard" },
   { label: "AI Recommendations", path: "/recommendations" },
+  { label: "Agents", path: "/agents" },
   { label: "Market", path: "/market", guestOk: true },
   { label: "News", path: "/news", guestOk: true },
   { label: "Update Log", path: "/updates", guestOk: true },
